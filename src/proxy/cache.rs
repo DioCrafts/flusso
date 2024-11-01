@@ -1,0 +1,1 @@
+// Cache de respuestas (opcional)

@@ -1,0 +1,1 @@
+// Funciones auxiliares comunes
