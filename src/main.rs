@@ -3,26 +3,33 @@ use std::error::Error;
 use flusso::config::settings::Settings;
 use flusso::gui::start_gui_server;
 use flusso::proxy::load_balancer::LoadBalancer;
-use flusso::ingress_controller::start_ingress_controller;
+use flusso::ingress_controller::{start_ingress_controller, IngressController};
 use futures_util::TryFutureExt; // Importamos TryFutureExt para usar map_err
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    // Carga la configuración de la aplicación
     let settings = Settings::new().expect("Failed to load configuration");
+    println!("Configuración cargada: {:?}", settings);
 
-    // Inicializa el balanceador de carga con un vector vacío de backends
     let load_balancer = Arc::new(LoadBalancer::new(Vec::new()));
+    println!("Balanceador de carga inicializado.");
 
-    // Definimos el puerto para el servidor GUI desde la configuración
     let gui_port = settings.gui_port.unwrap_or(8081);
+    println!("El servidor GUI se iniciará en el puerto: {}", gui_port);
 
-    // Ejecuta ambas tareas concurrentemente usando tokio::try_join!
+    // Inicia tanto el controlador de ingreso como el servidor GUI de manera concurrente
     tokio::try_join!(
-        start_ingress_controller(load_balancer.clone()).map_err(|e| Box::<dyn Error>::from(e)),
-        start_gui_server(load_balancer.clone(), gui_port).map_err(|e| Box::<dyn Error>::from(e))
+        start_ingress_controller(load_balancer.clone()).map_err(|e| {
+            eprintln!("Error en start_ingress_controller: {:?}", e);
+            Box::<dyn Error>::from(e)
+        }),
+        start_gui_server(load_balancer.clone(), gui_port).map_err(|e| {
+            eprintln!("Error en start_gui_server: {:?}", e);
+            Box::<dyn Error>::from(e)
+        })
     )?;
+
+    println!("Tareas ejecutadas exitosamente.");
 
     Ok(())
 }
-
