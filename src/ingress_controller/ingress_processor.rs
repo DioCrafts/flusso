@@ -11,16 +11,16 @@ pub enum IngressEvent {
 }
 
 pub struct IngressProcessor {
-    load_balancer: Arc<LoadBalancer>,  // Cambia LoadBalancer a Arc<LoadBalancer>
+    load_balancer: Arc<LoadBalancer>, // Cambia LoadBalancer a Arc<LoadBalancer>
     event_receiver: mpsc::Receiver<IngressEvent>,
 }
 
 impl IngressProcessor {
-    pub fn new(load_balancer: Arc<LoadBalancer>) -> Self {  // Cambia LoadBalancer a Arc<LoadBalancer>
-        let (_, rx) = mpsc::channel(32);
+    // Cambiamos el constructor para recibir el receptor del canal
+    pub fn new(load_balancer: Arc<LoadBalancer>, event_receiver: mpsc::Receiver<IngressEvent>) -> Self {
         Self {
             load_balancer,
-            event_receiver: rx,
+            event_receiver,
         }
     }
 
@@ -40,4 +40,3 @@ impl IngressProcessor {
         }
     }
 }
-

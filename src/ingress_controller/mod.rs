@@ -1,13 +1,12 @@
-// src/ingress_controller/mod.rs
-
 pub mod event_listener;
 pub mod ingress_processor;
 
 use crate::proxy::HttpProxy;
 use crate::proxy::load_balancer::LoadBalancer;
 use event_listener::EventListener;
-use ingress_processor::IngressProcessor;
+use ingress_processor::{IngressEvent, IngressProcessor};
 use std::sync::Arc;
+use tokio::sync::Mutex;
 
 pub struct IngressController {
     event_listener: EventListener,
@@ -17,9 +16,20 @@ pub struct IngressController {
 
 impl IngressController {
     pub fn new(load_balancer: Arc<LoadBalancer>) -> Self {
-        let event_listener = EventListener::new();
-        let ingress_processor = IngressProcessor::new(load_balancer.clone());
-        let proxy = HttpProxy::new(load_balancer);  // Usa `Arc<LoadBalancer>` directamente
+        println!("Inicializando IngressController...");
+
+        // Inicializamos EventListener con el canal y obtenemos tanto el transmisor como el receptor
+        let (event_listener, rx) = EventListener::new();
+        println!("EventListener inicializado.");
+
+        // Creamos IngressProcessor y le pasamos el receptor para procesar eventos
+        let ingress_processor = IngressProcessor::new(load_balancer.clone(), rx);
+        println!("IngressProcessor inicializado.");
+
+        let proxy = HttpProxy::new(load_balancer);
+        println!("HttpProxy inicializado.");
+
+        println!("IngressController inicializado completamente.");
 
         Self {
             event_listener,
@@ -30,14 +40,48 @@ impl IngressController {
 
     /// Inicializa el controlador y comienza a escuchar los eventos de Kubernetes.
     pub async fn start(&self) {
+        println!("Comenzando a escuchar eventos con el EventListener...");
         self.event_listener.start_listening().await;
+        println!("EventListener escuchando eventos.");
+    }
+
+    /// Procesa eventos de Ingress con el IngressProcessor
+    pub async fn process_events(&mut self) {
+        self.ingress_processor.process_events().await;
     }
 }
 
-// Nueva función para iniciar el IngressController
+// Nueva función para iniciar el IngressController con manejo de errores y registros detallados
 pub async fn start_ingress_controller(load_balancer: Arc<LoadBalancer>) -> Result<(), Box<dyn std::error::Error>> {
-    let controller = IngressController::new(load_balancer);  // Pasamos `Arc<LoadBalancer>` directamente
-    controller.start().await;
+    println!("Iniciando el controlador de ingreso...");
+    
+    // Utilizar Arc<Mutex<IngressController>> para acceso concurrente sin mover el controlador
+    let controller = Arc::new(Mutex::new(IngressController::new(load_balancer)));
+    println!("Controlador de ingreso inicializado.");
+
+    // Ejecutamos `start` y `process_events` como tareas concurrentes
+    println!("Iniciando el procesamiento de eventos...");
+
+    // Clonamos `controller` para poder pasarlo a ambas tareas de forma concurrente
+    let event_listener_task = {
+        let controller = Arc::clone(&controller);
+        tokio::spawn(async move {
+            let controller = controller.lock().await;
+            controller.start().await;
+        })
+    };
+
+    let ingress_processor_task = {
+        let controller = Arc::clone(&controller);
+        tokio::spawn(async move {
+            let mut controller = controller.lock().await;
+            controller.process_events().await;
+        })
+    };
+
+    // Esperamos que ambas tareas finalicen
+    let _ = tokio::try_join!(event_listener_task, ingress_processor_task)?;
+
+    println!("Controlador de ingreso iniciado exitosamente.");
     Ok(())
 }
-
