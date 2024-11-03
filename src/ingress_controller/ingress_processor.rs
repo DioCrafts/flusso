@@ -3,6 +3,7 @@
 use std::net::SocketAddr;
 use tokio::sync::mpsc;
 use crate::proxy::load_balancer::LoadBalancer;
+use std::sync::Arc;
 
 pub enum IngressEvent {
     Add(SocketAddr),
@@ -10,13 +11,13 @@ pub enum IngressEvent {
 }
 
 pub struct IngressProcessor {
-    load_balancer: LoadBalancer,
+    load_balancer: Arc<LoadBalancer>,  // Cambia LoadBalancer a Arc<LoadBalancer>
     event_receiver: mpsc::Receiver<IngressEvent>,
 }
 
 impl IngressProcessor {
-    pub fn new(load_balancer: LoadBalancer) -> Self {
-        let (_, rx) = mpsc::channel(32); // Canal de eventos compartido con el EventListener
+    pub fn new(load_balancer: Arc<LoadBalancer>) -> Self {  // Cambia LoadBalancer a Arc<LoadBalancer>
+        let (_, rx) = mpsc::channel(32);
         Self {
             load_balancer,
             event_receiver: rx,
@@ -39,3 +40,4 @@ impl IngressProcessor {
         }
     }
 }
+

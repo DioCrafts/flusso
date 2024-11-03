@@ -1,17 +1,17 @@
-// Manejo de solicitudes HTTP/S
 // src/proxy/http.rs
 
 use reqwest::{Client, Response};
 use std::error::Error;
 use super::load_balancer::LoadBalancer;
+use std::sync::Arc;
 
 pub struct HttpProxy {
     client: Client,
-    load_balancer: LoadBalancer,
+    load_balancer: Arc<LoadBalancer>,  // Cambia LoadBalancer a Arc<LoadBalancer>
 }
 
 impl HttpProxy {
-    pub fn new(load_balancer: LoadBalancer) -> Self {
+    pub fn new(load_balancer: Arc<LoadBalancer>) -> Self {  // Cambia LoadBalancer a Arc<LoadBalancer>
         Self {
             client: Client::new(),
             load_balancer,
@@ -34,3 +34,4 @@ impl HttpProxy {
         }
     }
 }
+

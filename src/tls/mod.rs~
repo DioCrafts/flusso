@@ -1,4 +1,4 @@
-use actix_web::{web::Data, middleware::Logger, App, HttpResponse, HttpServer};
+use actix_web::{web::Data, App, HttpResponse, HttpServer};
 use std::sync::Arc;
 use rustls::ServerConfig;
 use rustls::pki_types::{CertificateDer as Certificate, PrivateKeyDer as PrivateKey};
@@ -24,16 +24,19 @@ impl TlsConfig {
 // Configuración del servidor HTTPS
 pub async fn configure_https(tls_config: Arc<TlsConfig>) -> std::io::Result<()> {
     HttpServer::new(move || {
-        // No se especifica el tipo explícito de retorno
-        App::new()
-            .wrap(Logger::default()) // Añadir Logger como middleware
-            .app_data(Data::new(tls_config.clone()))
-            .route("/", actix_web::web::get().to(|| async {
-                HttpResponse::Ok().body("Hello, HTTPS!")
-            }))
+        create_app(tls_config.clone())
     })
     .bind(("0.0.0.0", 8443))?
     .run()
     .await
+}
+
+// Función `create_app` para crear la aplicación
+pub fn create_app(tls_config: Arc<TlsConfig>) -> App<impl actix_service::ServiceFactory> {
+    App::new()
+        .app_data(Data::new(tls_config))
+        .route("/", actix_web::web::get().to(|| async {
+            HttpResponse::Ok().body("Hello, HTTPS!")
+        }))
 }
 

@@ -1,4 +1,3 @@
-// Implementación del balanceador de carga
 // src/proxy/load_balancer.rs
 
 use std::net::SocketAddr;
@@ -43,4 +42,11 @@ impl LoadBalancer {
         let mut backends = self.backends.lock().unwrap();
         backends.retain(|&b| b != *backend);
     }
+
+    /// Devuelve una lista de los backends actuales.
+    pub fn get_backends(&self) -> Vec<SocketAddr> {
+        let backends = self.backends.lock().unwrap();
+        backends.clone() // Retorna una copia de la lista de backends
+    }
 }
+

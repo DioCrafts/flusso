@@ -1,31 +1,28 @@
-// src/main.rs
-
-use actix_web::rt::System;
 use std::sync::Arc;
+use std::error::Error;
+use flusso::config::settings::Settings;
+use flusso::gui::start_gui_server;
+use flusso::proxy::load_balancer::LoadBalancer;
+use flusso::ingress_controller::start_ingress_controller;
+use futures_util::TryFutureExt; // Importamos TryFutureExt para usar map_err
 
-use bilancia::config::settings::Settings;
-use bilancia::ingress_controller::start_ingress_controller;
-use bilancia::gui::start_gui_server;
-use bilancia::proxy::load_balancer::LoadBalancer;
-
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
     // Carga la configuración de la aplicación
     let settings = Settings::new().expect("Failed to load configuration");
 
-    // Inicializa el balanceador de carga
-    let load_balancer = Arc::new(LoadBalancer::new());
+    // Inicializa el balanceador de carga con un vector vacío de backends
+    let load_balancer = Arc::new(LoadBalancer::new(Vec::new()));
 
-    // Inicia el controlador de Ingress
-    let ingress_controller = start_ingress_controller(load_balancer.clone());
-    
-    // Inicia el servidor de la GUI en el puerto especificado
+    // Definimos el puerto para el servidor GUI desde la configuración
     let gui_port = settings.gui_port.unwrap_or(8081);
-    let gui_server = start_gui_server(load_balancer.clone(), gui_port);
 
-    // Ejecuta ambas tareas concurrentemente
-    System::new().block_on(async {
-        tokio::try_join!(ingress_controller, gui_server)?;
-        Ok(())
-    })
+    // Ejecuta ambas tareas concurrentemente usando tokio::try_join!
+    tokio::try_join!(
+        start_ingress_controller(load_balancer.clone()).map_err(|e| Box::<dyn Error>::from(e)),
+        start_gui_server(load_balancer.clone(), gui_port).map_err(|e| Box::<dyn Error>::from(e))
+    )?;
+
+    Ok(())
 }
+

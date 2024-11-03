@@ -27,6 +27,7 @@ async fn index() -> impl Responder {
 
 /// Devuelve una lista de los backends actuales en formato JSON.
 async fn get_backends(data: web::Data<Arc<LoadBalancer>>) -> impl Responder {
-    let backends = data.get_backends();  // Reemplaza con el método que devuelva la lista de backends
+    let backends = data.get_backends(); // Ahora el método get_backends existe
     HttpResponse::Ok().json(backends)
 }
+

@@ -1,7 +1,7 @@
 // src/config/settings.rs
 
 use serde::Deserialize;
-use config::Config;
+use config::{Config, ConfigError};
 use dotenv::dotenv;
 use std::env;
 
@@ -15,11 +15,14 @@ pub struct Settings {
 }
 
 impl Settings {
-    pub fn new() -> Result<Self, config::ConfigError> {
+    pub fn new() -> Result<Self, ConfigError> {
         dotenv().ok();
-        
+
         let mut settings = Config::default();
         settings.merge(config::Environment::default())?;
-        settings.try_into()
+
+        // Usa try_deserialize en lugar de try_into
+        settings.try_deserialize()
     }
 }
+
