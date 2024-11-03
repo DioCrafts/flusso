@@ -9,6 +9,10 @@ authors = ["Dionisio <tuemail@ejemplo.com>"]
 license = "MIT"
 repository = "https://github.com/dioni-dev/flusso"
 
+[[bin]]
+name = "flusso"
+path = "src/main.rs"
+
 [dependencies]
 # Dependencias de Actix para el servidor web y web GUI
 actix-web = "4.9.0"

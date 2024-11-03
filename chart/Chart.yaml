@@ -1,0 +1,5 @@
+apiVersion: v2
+name: flusso
+description: A Rust-based Ingress Controller
+version: 0.1.0
+

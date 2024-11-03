@@ -1,0 +1,9 @@
+image:
+  repository: tu_usuario/flusso
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  port: 8080
+  type: ClusterIP
+
