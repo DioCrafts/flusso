@@ -1,146 +1,180 @@
 
-# Flusso
+# Flusso - High-Performance Kubernetes Ingress Controller in Rust
 
-[![Build Status](https://img.shields.io/github/workflow/status/yourusername/flusso/CI)](https://github.com/yourusername/flusso/actions)
-[![Latest Release](https://img.shields.io/github/v/release/yourusername/flusso)](https://github.com/yourusername/flusso/releases)
-[![License](https://img.shields.io/github/license/yourusername/flusso)](LICENSE)
+[![Build Status](https://img.shields.io/github/workflow/status/dioni-dev/flusso/Build%20and%20Test)](https://github.com/dioni-dev/flusso/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Docker Pulls](https://img.shields.io/docker/pulls/dioni-dev/flusso)](https://hub.docker.com/r/dioni-dev/flusso)
+[![Latest Release](https://img.shields.io/github/release/dioni-dev/flusso.svg)](https://github.com/dioni-dev/flusso/releases)
 
-## Overview
+Flusso is an open-source, high-performance Ingress Controller for Kubernetes, built in **Rust**. Designed to provide a **lightweight**, **secure**, and **scalable** alternative to popular ingress solutions like Traefik and NGINX, Flusso delivers optimized performance and efficient load balancing tailored for cloud-native environments.
 
-**Flusso** is a high-performance, secure **Ingress controller** for **Kubernetes** clusters, written entirely in **Rust**. Designed to provide a robust and fast proxy with enhanced security features, Flusso is ideal for routing traffic in modern cloud-native applications. With Flusso, you can ensure traffic management with low latency, TLS termination, and real-time monitoring of your services. 
+## Features
 
-### Key Features
-
-- **High-performance Ingress for Kubernetes**: Flusso handles incoming traffic efficiently, ensuring low latency and high throughput for your Kubernetes services.
-- **Secure by design**: Built with **Rust's memory safety** guarantees, Flusso ensures a secure, reliable environment for routing traffic.
-- **HTTPS and TLS support**: Secure communication with support for HTTPS, including certificate management through integration with Cert-Manager.
-- **Real-time traffic visualization**: Flusso includes a built-in **GUI** for monitoring traffic flow and viewing Ingress statistics directly in your web browser.
-- **Flexible routing rules**: Fully compliant with Kubernetes Ingress specifications, supporting host-based and path-based routing.
-- **Written in Rust**: Built from the ground up in Rust, leveraging the language’s performance and safety to handle high loads with minimal resource consumption.
+- **Lightweight and Fast**: Written in Rust, offering high performance and low memory and CPU consumption.
+- **Advanced Load Balancing**: Flusso supports custom load balancing algorithms for optimized traffic distribution.
+- **Secure by Design**: Implements modern TLS protocols with Rustls for enhanced security.
+- **Dynamic Backends**: Automatically updates routing based on Kubernetes service changes.
+- **Flexible Configuration**: Easily configurable via YAML files or environment variables.
+- **Minimal Dependencies**: Avoids unnecessary dependencies for lightweight container images.
 
 ## Table of Contents
 
 - [Installation](#installation)
-- [Getting Started](#getting-started)
 - [Configuration](#configuration)
-- [Monitoring and Visualization](#monitoring-and-visualization)
+- [Usage](#usage)
+- [Kubernetes Setup](#kubernetes-setup)
 - [Contributing](#contributing)
 - [License](#license)
 
+---
+
 ## Installation
 
-Flusso can be deployed in any Kubernetes cluster. Follow the steps below to install it using Helm or kubectl.
+To get started with Flusso, you can use either Docker or Helm to deploy the Ingress Controller in your Kubernetes cluster.
 
-### Using Helm
+### Docker Installation
 
-```bash
-helm repo add flusso https://yourhelmrepo.com/charts
-helm install flusso flusso/flusso --namespace ingress-system
+1. Pull the Docker image:
+   ```sh
+   docker pull dioni-dev/flusso-ingress-controller:latest
+   ```
+
+2. Run the Docker container:
+   ```sh
+   docker run -p 8080:8080 -p 8081:8081 -e SERVER_ADDR="0.0.0.0:8080" -e TLS_ENABLED="true" dioni-dev/flusso-ingress-controller
+   ```
+
+### Kubernetes Installation with Helm
+
+1. Add your Helm repository (if not added yet):
+   ```sh
+   helm repo add your-repo https://your-helm-repo.com/charts
+   ```
+
+2. Install Flusso Ingress Controller:
+   ```sh
+   helm install flusso-ingress your-repo/flusso-ingress
+   ```
+
+For more configuration options, refer to the [values.yaml](chart/values.yaml).
+
+---
+
+## Configuration
+
+Flusso supports several configuration options, both via environment variables and Helm chart values. Here are the key parameters:
+
+- **SERVER_ADDR**: Define the address where the Ingress Controller will listen. Default is `0.0.0.0:8080`.
+- **TLS_ENABLED**: Enable or disable TLS (default is `true`).
+- **TLS_CERT_PATH / TLS_KEY_PATH**: Paths to TLS certificate and key files.
+
+### Example `values.yaml` Configuration
+
+```yaml
+replicaCount: 1
+
+image:
+  repository: dioni-dev/flusso-ingress-controller
+  tag: latest
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  name: flusso-ingress
+
+service:
+  type: NodePort
+  port: 80
+  targetPort: 8080
+
+env:
+  TLS_ENABLED: "true"
+  SERVER_ADDR: "0.0.0.0:8080"
 ```
 
-### Using kubectl
+---
 
-1. Clone the repository:
+## Usage
 
-   ```bash
-   git clone https://github.com/yourusername/flusso.git
-   ```
+### Basic Routing
 
-2. Apply the manifests:
+Flusso automatically routes incoming traffic to Kubernetes services defined by Ingress resources. Add an Ingress rule to direct traffic to your applications.
 
-   ```bash
-   kubectl apply -f k8s-manifests/deployment.yaml
-   ```
-
-This will deploy Flusso into your Kubernetes cluster.
-
-## Getting Started
-
-Once Flusso is installed, it will begin managing **Ingress resources** in your cluster. To define an Ingress rule, create a YAML file like this:
+### Example Ingress Resource
 
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: example-ingress
-  annotations:
-    kubernetes.io/ingress.class: "flusso"
 spec:
+  ingressClassName: flusso
   rules:
-  - host: example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: example-service
-            port:
-              number: 80
+    - host: example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: example-service
+                port:
+                  number: 80
 ```
 
-Apply the rule with `kubectl apply -f example-ingress.yaml`.
+### Monitoring
 
-## Configuration
+Flusso exposes a built-in web GUI accessible at `http://<controller-ip>:8081`, providing insights into active backends and routing information.
 
-Flusso comes with a default configuration that should work for most use cases. However, you can customize it via a configuration file (`config.toml`) or environment variables.
+## Kubernetes Setup
 
-Key configuration options include:
+Flusso is designed to work seamlessly in Kubernetes as an Ingress Controller.
 
-- **TLS/SSL**: Enable or disable TLS support, and configure certificate management.
-- **Load balancing**: Choose between round-robin, least connections, or IP hash for balancing traffic across services.
-- **Logging**: Adjust log levels to monitor traffic and debug issues.
+### Prerequisites
 
-For advanced configuration, refer to the [Configuration Guide](https://github.com/yourusername/flusso/wiki/Configuration).
+- Kubernetes version 1.19 or higher
+- Helm version 3 or higher
 
-## Monitoring and Visualization
+### Deploying on Minikube
 
-Flusso includes a built-in **GUI** accessible via a web interface at a specific port (default: `8080`). This interface allows you to:
+1. Enable the `metrics-server` on Minikube (optional but recommended):
+   ```sh
+   minikube addons enable metrics-server
+   ```
 
-- View real-time traffic flow.
-- Monitor requests per second (RPS), latencies, and error rates.
-- Visualize the current status of Ingress rules and routes.
+2. Deploy Flusso with Helm:
+   ```sh
+   helm install flusso-ingress your-repo/flusso-ingress
+   ```
 
-### Accessing the GUI
+3. Check pod and service status:
+   ```sh
+   kubectl get pods -A
+   kubectl get svc -A
+   ```
 
-Once deployed, access the dashboard by navigating to:
-
-```
-http://<flusso-ip>:8080/gui
-```
-
-This will display the real-time traffic and Ingress management interface.
+---
 
 ## Contributing
 
-We welcome contributions from the community! If you'd like to report issues or contribute code, please visit the [Contributing Guide](https://github.com/yourusername/flusso/blob/main/CONTRIBUTING.md) to get started.
+We welcome contributions to make Flusso even better! If you have suggestions for improvements, open a GitHub issue or submit a pull request. Please refer to our [Contributing Guide](CONTRIBUTING.md) for more details.
 
-### Development Setup
-
-To set up the project locally:
-
-1. Install Rust: [https://www.rust-lang.org/tools/install](https://www.rust-lang.org/tools/install)
-2. Clone the repository:
-
-   ```bash
-   git clone https://github.com/yourusername/flusso.git
-   cd flusso
-   ```
-
-3. Build and run the project:
-
-   ```bash
-   cargo run
-   ```
-
-### Running Tests
-
-To run the test suite:
-
-```bash
-cargo test
-```
+---
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+Flusso is licensed under the [MIT License](LICENSE).
+
+---
+
+## Contact & Support
+
+- **Website**: [Your Website](https://yourwebsite.com)
+- **GitHub**: [GitHub Repository](https://github.com/dioni-dev/flusso)
+- **Docker Hub**: [Docker Hub Repository](https://hub.docker.com/r/dioni-dev/flusso)
+
+For further support, reach out via GitHub issues or visit our community forums.
+
+---
+
+Flusso aims to be the next generation Ingress Controller for Kubernetes clusters, offering a streamlined, secure, and high-performance solution built in Rust. Join the movement and contribute today!
