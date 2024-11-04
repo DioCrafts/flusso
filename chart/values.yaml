@@ -2,7 +2,7 @@
 replicaCount: 1
 
 image:
-  repository: torrefacto/flusso-ingress-controller
+  repository: diocrafts/flusso-ingress-controller
   tag: latest
   pullPolicy: IfNotPresent
 
