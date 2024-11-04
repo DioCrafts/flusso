@@ -1,10 +1,10 @@
 
 # Flusso - High-Performance Kubernetes Ingress Controller in Rust
 
-[![Build Status](https://img.shields.io/github/workflow/status/dioni-dev/flusso/Build%20and%20Test)](https://github.com/dioni-dev/flusso/actions)
+[![Build Status](https://img.shields.io/github/workflow/status/diocrafts/flusso/Build%20and%20Test)](https://github.com/diocrafts/flusso/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Docker Pulls](https://img.shields.io/docker/pulls/dioni-dev/flusso)](https://hub.docker.com/r/dioni-dev/flusso)
-[![Latest Release](https://img.shields.io/github/release/dioni-dev/flusso.svg)](https://github.com/dioni-dev/flusso/releases)
+[![Docker Pulls](https://img.shields.io/docker/pulls/diocrafts/flusso)](https://hub.docker.com/r/diocrafts/flusso)
+[![Latest Release](https://img.shields.io/github/release/diocrafts/flusso.svg)](https://github.com/diocrafts/flusso/releases)
 
 Flusso is an open-source, high-performance Ingress Controller for Kubernetes, built in **Rust**. Designed to provide a **lightweight**, **secure**, and **scalable** alternative to popular ingress solutions like Traefik and NGINX, Flusso delivers optimized performance and efficient load balancing tailored for cloud-native environments.
 
@@ -36,12 +36,12 @@ To get started with Flusso, you can use either Docker or Helm to deploy the Ingr
 
 1. Pull the Docker image:
    ```sh
-   docker pull dioni-dev/flusso-ingress-controller:latest
+   docker pull diocrafts/flusso-ingress-controller:latest
    ```
 
 2. Run the Docker container:
    ```sh
-   docker run -p 8080:8080 -p 8081:8081 -e SERVER_ADDR="0.0.0.0:8080" -e TLS_ENABLED="true" dioni-dev/flusso-ingress-controller
+   docker run -p 8080:8080 -p 8081:8081 -e SERVER_ADDR="0.0.0.0:8080" -e TLS_ENABLED="true" diocrafts/flusso-ingress-controller
    ```
 
 ### Kubernetes Installation with Helm
@@ -74,7 +74,7 @@ Flusso supports several configuration options, both via environment variables an
 replicaCount: 1
 
 image:
-  repository: dioni-dev/flusso-ingress-controller
+  repository: diocrafts/flusso-ingress-controller
   tag: latest
   pullPolicy: IfNotPresent
 
@@ -170,8 +170,8 @@ Flusso is licensed under the [MIT License](LICENSE).
 ## Contact & Support
 
 - **Website**: [Your Website](https://yourwebsite.com)
-- **GitHub**: [GitHub Repository](https://github.com/dioni-dev/flusso)
-- **Docker Hub**: [Docker Hub Repository](https://hub.docker.com/r/dioni-dev/flusso)
+- **GitHub**: [GitHub Repository](https://github.com/diocrafts/flusso)
+- **Docker Hub**: [Docker Hub Repository](https://hub.docker.com/r/diocrafts/flusso)
 
 For further support, reach out via GitHub issues or visit our community forums.
 
