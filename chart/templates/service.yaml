@@ -1,12 +1,15 @@
+# chart/templates/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-flusso
+  name: {{ include "flusso-ingress-controller.fullname" . }}
+  labels:
+    app: {{ include "flusso-ingress-controller.name" . }}
 spec:
+  type: ClusterIP
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: {{ .Values.service.port }}
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
   selector:
-    app: {{ .Release.Name }}-flusso
-  type: {{ .Values.service.type }}
-
+    app: {{ include "flusso-ingress-controller.name" . }}
