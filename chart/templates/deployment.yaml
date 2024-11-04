@@ -1,20 +1,30 @@
+# chart/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-flusso
+  name: {{ include "flusso-ingress-controller.fullname" . }}
+  labels:
+    app: {{ include "flusso-ingress-controller.name" . }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-flusso
+      app: {{ include "flusso-ingress-controller.name" . }}
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}-flusso
+        app: {{ include "flusso-ingress-controller.name" . }}
     spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
       containers:
-        - name: flusso
+        - name: flusso-ingress
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: {{ .Values.service.port }}
-
+            - containerPort: 8080
+            - containerPort: 8081
+          env:
+            - name: TLS_ENABLED
+              value: "{{ .Values.env.TLS_ENABLED }}"
+            - name: SERVER_ADDR
+              value: "{{ .Values.env.SERVER_ADDR }}"

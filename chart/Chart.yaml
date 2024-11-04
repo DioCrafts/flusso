@@ -1,5 +1,6 @@
+# chart/Chart.yaml
 apiVersion: v2
-name: flusso
-description: A Rust-based Ingress Controller
+name: flusso-ingress-controller
+description: Un controlador de Ingress alternativo a Traefik y NGINX escrito en Rust.
 version: 0.1.0
-
+appVersion: "1.0"

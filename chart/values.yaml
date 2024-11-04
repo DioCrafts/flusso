@@ -1,9 +1,22 @@
+# chart/values.yaml
+replicaCount: 1
+
 image:
-  repository: tu_usuario/flusso
-  tag: "latest"
+  repository: torrefacto/flusso-ingress-controller
+  tag: latest
   pullPolicy: IfNotPresent
 
-service:
-  port: 8080
-  type: ClusterIP
+serviceAccount:
+  create: true
+  name: flusso-ingress
 
+service:
+  type: NodePort
+  port: 80
+  targetPort: 8080
+
+ingressClass: flusso
+
+env:
+  TLS_ENABLED: "true"
+  SERVER_ADDR: "0.0.0.0:8080"
