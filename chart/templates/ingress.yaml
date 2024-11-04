@@ -1,17 +1,19 @@
+# chart/templates/ingress.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ .Release.Name }}-flusso
+  name: {{ include "flusso-ingress-controller.fullname" . }}
+  annotations:
+    kubernetes.io/ingress.class: "{{ .Values.ingressClass }}"
 spec:
   rules:
-    - host: "example.com"
+    - host: "example.local"
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: {{ .Release.Name }}-flusso
+                name: {{ include "flusso-ingress-controller.fullname" . }}
                 port:
                   number: {{ .Values.service.port }}
-
