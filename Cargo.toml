@@ -37,7 +37,7 @@ futures-util = "0.3.31"
 anyhow = "1.0"
 
 # Dependencias para TLS y certificados
-rustls = "0.23.16"
+rustls = { version = "0.23.16", features = ["aws_lc_rs"] }
 rustls-pemfile = "0.3.0"
 
 # Dependencias para métricas y Prometheus
