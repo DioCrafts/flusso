@@ -1,0 +1,26 @@
+# Ignora los archivos de compilación de Rust
+/target/
+
+# Ignora archivos de compilación específicos de debug y release
+**/debug/
+**/release/
+
+# Ignora archivos de dependencias y compilación de Cargo
+/.cargo/
+/Cargo.lock
+
+# Ignora archivos de configuración de editor y sistema
+*.swp
+*.DS_Store
+*.log
+
+# Ignora archivos de compilación y artefactos específicos de Rust
+*.rlib
+*.dSYM
+*.exe
+*.dll
+*.so
+*.dylib
+*.stackdump
+*.profraw
+
