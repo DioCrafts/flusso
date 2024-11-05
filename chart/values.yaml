@@ -3,7 +3,7 @@ replicaCount: 1
 
 image:
   repository: diocrafts/flusso-ingress-controller
-  tag: latest
+  tag: v0.0.1
   pullPolicy: IfNotPresent
 
 serviceAccount:

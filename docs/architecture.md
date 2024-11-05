@@ -1,1 +1,1 @@
-# Documento de arquitectura de software
+# Documento de arquitectura de softwarei.
