@@ -1,5 +1,6 @@
 # Ignora los archivos de compilación de Rust
-/target/
+/target/**
+
 
 # Ignora archivos de compilación específicos de debug y release
 **/debug/
