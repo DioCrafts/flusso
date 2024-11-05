@@ -26,6 +26,7 @@ config = "0.13"
 kube = { version = "0.96.0", features = ["runtime"] }
 kube-runtime = "0.96.0"
 k8s-openapi = { version = "0.23", features = ["v1_28"] }
+bytes = "1.1"
 
 # Dependencias para el proxy y manejo de HTTP con TLS en Reqwest
 reqwest = { version = "0.11.14", default-features = false, features = ["json", "rustls-tls"] }

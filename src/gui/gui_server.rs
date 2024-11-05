@@ -13,7 +13,7 @@ pub async fn start_gui_server(load_balancer: Arc<LoadBalancer>, port: u16) -> st
             .route("/backends", web::get().to(get_backends))
             .service(actix_files::Files::new("/static", "./src/gui/static").show_files_listing())
     })
-    .bind(("127.0.0.1", port))?
+    .bind(("0.0.0.0", port))?
     .run()
     .await
 }
