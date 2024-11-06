@@ -24,7 +24,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Inicia el controlador de ingreso y el servidor GUI concurrentemente
     tokio::try_join!(
-        start_ingress_controller(load_balancer.clone()).map_err(|e| {
+        start_ingress_controller(load_balancer.clone(), &settings.server_addr).map_err(|e| {
             eprintln!("Error en start_ingress_controller: {:?}", e);
             Box::<dyn Error>::from(e)
         }),

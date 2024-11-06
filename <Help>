@@ -1,5 +1,7 @@
 // src/proxy/load_balancer.rs
 
+// src/proxy/load_balancer.rs
+
 use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
 
@@ -10,6 +12,7 @@ pub struct LoadBalancer {
 
 impl LoadBalancer {
     pub fn new(backends: Vec<SocketAddr>) -> Self {
+        println!("Inicializando LoadBalancer con backends: {:?}", backends);
         Self {
             backends: Arc::new(Mutex::new(backends)),
             current_index: Arc::new(Mutex::new(0)),
@@ -19,14 +22,14 @@ impl LoadBalancer {
     /// Selecciona el siguiente backend de acuerdo al algoritmo Round Robin.
     pub fn select_backend(&self) -> Option<SocketAddr> {
         let backends = self.backends.lock().unwrap();
-        // Log de los backends disponibles
-        println!("Backends disponibles en el balanceador: {:?}", *backends);
         if backends.is_empty() {
+            println!("No hay backends disponibles en LoadBalancer");
             return None;
         }
 
         let mut index = self.current_index.lock().unwrap();
         let backend = backends[*index];
+        println!("Backend seleccionado: {}", backend); // Log para depuración
         *index = (*index + 1) % backends.len();
         Some(backend)
     }
@@ -35,24 +38,25 @@ impl LoadBalancer {
     pub fn add_backend(&self, backend: SocketAddr) {
         let mut backends = self.backends.lock().unwrap();
         if !backends.contains(&backend) {
-            println!("Agregando backend: {}", backend);
+            println!("Añadiendo nuevo backend: {}", backend);
             backends.push(backend);
         } else {
-            println!("Backend ya existe: {}", backend);
+            println!("El backend {} ya existe, no se añadirá", backend);
         }
     }
 
     /// Permite remover un backend.
     pub fn remove_backend(&self, backend: &SocketAddr) {
         let mut backends = self.backends.lock().unwrap();
+        println!("Eliminando backend: {}", backend);
         backends.retain(|&b| b != *backend);
     }
 
     /// Devuelve una lista de los backends actuales.
     pub fn get_backends(&self) -> Vec<SocketAddr> {
         let backends = self.backends.lock().unwrap();
+        println!("Backends actuales: {:?}", backends); // Log para depuración
         backends.clone() // Retorna una copia de la lista de backends
     }
 }
-
 

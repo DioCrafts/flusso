@@ -17,7 +17,7 @@ COPY src ./src
 RUN cargo build --release --target x86_64-unknown-linux-musl
 
 # Etapa final
-FROM scratch
+FROM debian:bookworm-slim
 WORKDIR /usr/local/bin
 
 # Copia el binario estático desde la etapa de construcción
