@@ -1,8 +1,7 @@
-// src/proxy/load_balancer.rs
-
 use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
 
+#[derive(Clone, Debug)] // Añade Clone y Debug aquí
 pub struct LoadBalancer {
     backends: Arc<Mutex<Vec<SocketAddr>>>, // Compartido de manera segura y accesible para modificaciones concurrentes
     current_index: Arc<Mutex<usize>>,
@@ -19,15 +18,15 @@ impl LoadBalancer {
     /// Selecciona el siguiente backend de acuerdo al algoritmo Round Robin.
     pub fn select_backend(&self) -> Option<SocketAddr> {
         let backends = self.backends.lock().unwrap();
-        // Log de los backends disponibles
-        println!("Backends disponibles en el balanceador: {:?}", *backends);
+        println!("Backends disponibles en el balanceador: {:?}", *backends); // Log para ver backends actuales
         if backends.is_empty() {
+            println!("No hay backends disponibles");
             return None;
         }
-
         let mut index = self.current_index.lock().unwrap();
         let backend = backends[*index];
         *index = (*index + 1) % backends.len();
+        println!("Backend seleccionado: {}", backend); // Log detallado al seleccionar un backend
         Some(backend)
     }
 
@@ -35,7 +34,7 @@ impl LoadBalancer {
     pub fn add_backend(&self, backend: SocketAddr) {
         let mut backends = self.backends.lock().unwrap();
         if !backends.contains(&backend) {
-            println!("Agregando backend: {}", backend);
+            println!("Agregando backend: {}", backend); // Log detallado al añadir
             backends.push(backend);
         } else {
             println!("Backend ya existe: {}", backend);
@@ -54,5 +53,4 @@ impl LoadBalancer {
         backends.clone() // Retorna una copia de la lista de backends
     }
 }
-
 
