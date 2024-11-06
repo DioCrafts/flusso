@@ -5,10 +5,10 @@ use flusso::gui::start_gui_server;
 use flusso::proxy::load_balancer::LoadBalancer;
 use flusso::ingress_controller::start_ingress_controller;
 use futures_util::TryFutureExt;
-use rustls::crypto; // Importa el módulo de cripto
+use rustls::crypto;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     // Configura el proveedor criptográfico predeterminado a nivel de proceso
     crypto::aws_lc_rs::default_provider().install_default()
         .expect("Failed to set default CryptoProvider");
@@ -26,11 +26,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
     tokio::try_join!(
         start_ingress_controller(load_balancer.clone(), &settings.server_addr).map_err(|e| {
             eprintln!("Error en start_ingress_controller: {:?}", e);
-            Box::<dyn Error>::from(e)
+            Box::<dyn std::error::Error + Send + Sync>::from(e)
         }),
         start_gui_server(load_balancer.clone(), gui_port).map_err(|e| {
             eprintln!("Error en start_gui_server: {:?}", e);
-            Box::<dyn Error>::from(e)
+            Box::<dyn std::error::Error + Send + Sync>::from(e)
         })
     )?;
 

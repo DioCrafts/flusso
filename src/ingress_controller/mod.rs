@@ -7,10 +7,12 @@ use event_listener::EventListener;
 use ingress_processor::{IngressEvent, IngressProcessor};
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use tokio::task::LocalSet;
 use actix_web::{web, App, HttpServer, HttpRequest, HttpResponse};
 use bytes::Bytes;  // Importa el tipo Bytes que se usa en forward_request
 use reqwest::Method;  // Importa el tipo Method desde reqwest
 use reqwest::header::{HeaderMap as ReqwestHeaderMap, HeaderName};
+use futures_util::TryFutureExt;
 
 pub struct IngressController {
     event_listener: EventListener,
@@ -23,7 +25,7 @@ impl IngressController {
         println!("Inicializando IngressController...");
 
         // Inicializamos EventListener con el canal y obtenemos tanto el transmisor como el receptor
-        let (event_listener, rx) = EventListener::new();
+        let (event_listener, rx) = EventListener::new(load_balancer.clone());
         println!("EventListener inicializado.");
 
         // Creamos IngressProcessor y le pasamos el receptor para procesar eventos
@@ -46,7 +48,7 @@ impl IngressController {
 // src/ingress_controller/mod.rs
     pub async fn start(&self) {
         println!("Comenzando a escuchar eventos con el EventListener...");
-        let listener = self.event_listener.clone(); // Clonamos el EventListener para evitar problemas de propiedad
+        let listener = self.event_listener.clone();
         tokio::spawn(async move {
             if let Err(e) = listener.start_listening().await {
                 eprintln!("Error en EventListener: {:?}", e);
@@ -62,17 +64,11 @@ impl IngressController {
 }
 
 // Nueva función para iniciar el IngressController con manejo de errores y registros detallados
-pub async fn start_ingress_controller(load_balancer: Arc<LoadBalancer>, server_addr: &str) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn start_ingress_controller(load_balancer: Arc<LoadBalancer>, server_addr: &str) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     println!("Iniciando el controlador de ingreso en {}", server_addr);
-    
-    // Convertimos server_addr en String para usar en el tokio::spawn
-    let server_addr = server_addr.to_string();
-    let server_addr_for_task = server_addr.clone(); // Clonar server_addr para el uso en el bloque async
-    
-    // Clonamos `load_balancer` para pasarlo al HttpProxy
-    let load_balancer_clone = load_balancer.clone();
 
-    // Creamos el controlador
+    let server_addr = server_addr.to_string();
+    let load_balancer_clone = load_balancer.clone();
     let mut controller = IngressController::new(load_balancer);
 
     let start_task = tokio::spawn({
@@ -80,30 +76,32 @@ pub async fn start_ingress_controller(load_balancer: Arc<LoadBalancer>, server_a
         async move {
             listener.start_listening().await;
         }
-    });
+    }).map_err(|e| Box::new(e) as Box<dyn std::error::Error + Send + Sync>);
 
     let process_task = tokio::spawn(async move {
         controller.process_events().await;
-    });
+    }).map_err(|e| Box::new(e) as Box<dyn std::error::Error + Send + Sync>);
 
-    // Configuramos el servidor Actix usando actix_web::rt::spawn para asegurar que sea `Send`
-    let http_server_task = actix_web::rt::spawn(async move {
-        HttpServer::new(move || {
-            let http_proxy = HttpProxy::new(load_balancer_clone.clone());
+    // Creamos una instancia persistente de `LocalSet`
+    let local_set = LocalSet::new();
+    let server_addr_clone = server_addr.clone(); // Clonamos `server_addr` para evitar su movimiento
 
-            App::new()
-                .app_data(web::Data::new(http_proxy))
-                .default_service(
-                    web::route().to(forward_request)
-                )
+    let http_server_task = local_set
+        .run_until(async move {
+            HttpServer::new(move || {
+                let http_proxy = HttpProxy::new(load_balancer_clone.clone());
+
+                App::new()
+                    .app_data(web::Data::new(http_proxy))
+                    .default_service(web::route().to(forward_request))
+            })
+            .bind(server_addr_clone)?
+            .run()
+            .await
         })
-        .bind(server_addr_for_task)? // Usamos la versión clonada
-        .run()
-        .await
-    });
+        .map_err(|e| Box::new(e) as Box<dyn std::error::Error + Send + Sync>);
 
-    // Esperamos a que todas las tareas finalicen
-    let _ = tokio::try_join!(start_task, process_task, http_server_task)?;
+    tokio::try_join!(start_task, process_task, http_server_task)?;
 
     println!("Controlador de ingreso iniciado exitosamente en {}", server_addr);
     Ok(())
@@ -147,5 +145,4 @@ async fn forward_request(
         Err(_) => HttpResponse::InternalServerError().body("Error al reenviar solicitud"),
     }
 }
-
 
