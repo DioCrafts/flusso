@@ -32,3 +32,8 @@ h1, h2 {
     padding: 0.5rem;
     border-bottom: 1px solid #ccc;
 }
+
+#backend-chart {
+    margin-top: 1rem;
+}
+
