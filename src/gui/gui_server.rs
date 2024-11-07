@@ -12,7 +12,7 @@ pub async fn start_gui_server(load_balancer: Arc<LoadBalancer>, port: u16) -> st
             .app_data(web::Data::new(load_balancer.clone()))
             .route("/", web::get().to(index))
             .route("/backends", web::get().to(get_backends))
-            .service(actix_files::Files::new("/static", "./src/gui/static").show_files_listing())
+            .service(actix_files::Files::new("/static", "/usr/local/bin/static").show_files_listing())
     })
     .bind(("0.0.0.0", port))?
     .run()
@@ -37,4 +37,3 @@ async fn get_backends(data: web::Data<Arc<LoadBalancer>>) -> impl Responder {
     }).collect::<Vec<_>>();
     HttpResponse::Ok().json(backends)
 }
-
