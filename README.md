@@ -1,5 +1,5 @@
 
-# Flusso - High-Performance Kubernetes Ingress Controller in Rust
+# 🚀 Flusso - Secure, High-Performance Kubernetes Ingress Controller in Rust 🦀🔒
 
 <div align="center">
   
