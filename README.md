@@ -3,26 +3,29 @@
 
 <div align="center">
   
-  [![Build Status](https://img.shields.io/github/actions/workflow/status/diocrafts/flusso/build-and-test.yml?branch=main)](https://github.com/diocrafts/flusso/actions)
   [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
   [![Docker Pulls](https://img.shields.io/docker/pulls/diocrafts/flusso-ingress-controller)](https://hub.docker.com/r/diocrafts/flusso-ingress-controller)
   [![Latest Release](https://img.shields.io/github/release/diocrafts/flusso.svg)](https://github.com/diocrafts/flusso/releases)
   [![GitHub Stars](https://img.shields.io/github/stars/diocrafts/flusso?style=social)](https://github.com/diocrafts/flusso/stargazers)
+  [![GitHub Issues](https://img.shields.io/github/issues/diocrafts/flusso)](https://github.com/diocrafts/flusso/issues)
+  [![GitHub Forks](https://img.shields.io/github/forks/diocrafts/flusso?style=social)](https://github.com/diocrafts/flusso/network/members)
+  [![Last Commit](https://img.shields.io/github/last-commit/diocrafts/flusso)](https://github.com/diocrafts/flusso/commits/main)
+  [![Docker Image Size](https://img.shields.io/docker/image-size/diocrafts/flusso-ingress-controller/latest)](https://hub.docker.com/r/diocrafts/flusso-ingress-controller)
 
 </div>
 
 
+🚀 Flusso is an open-source, high-performance Ingress Controller for Kubernetes, built in **Rust** 🦀. Designed to provide a **lightweight** 🌱, **secure** 🔒, and **scalable** 📈 alternative to popular ingress solutions like Traefik and NGINX, Flusso delivers optimized performance ⚙️ and efficient load balancing 🔄 tailored for cloud-native environments ☁️.
 
-Flusso is an open-source, high-performance Ingress Controller for Kubernetes, built in **Rust**. Designed to provide a **lightweight**, **secure**, and **scalable** alternative to popular ingress solutions like Traefik and NGINX, Flusso delivers optimized performance and efficient load balancing tailored for cloud-native environments.
+## Features ✨
 
-## Features
+- **Lightweight and Fast** ⚡: Written in Rust 🦀, offering high performance and low memory and CPU consumption.
+- **Advanced Load Balancing** 🔄: Flusso supports custom load balancing algorithms for optimized traffic distribution.
+- **Secure by Design** 🔒: Implements modern TLS protocols with Rustls for enhanced security.
+- **Dynamic Backends** 🔄: Automatically updates routing based on Kubernetes service changes.
+- **Flexible Configuration** 🛠️: Easily configurable via YAML files or environment variables.
+- **Minimal Dependencies** 📦: Avoids unnecessary dependencies for lightweight container images.
 
-- **Lightweight and Fast**: Written in Rust, offering high performance and low memory and CPU consumption.
-- **Advanced Load Balancing**: Flusso supports custom load balancing algorithms for optimized traffic distribution.
-- **Secure by Design**: Implements modern TLS protocols with Rustls for enhanced security.
-- **Dynamic Backends**: Automatically updates routing based on Kubernetes service changes.
-- **Flexible Configuration**: Easily configurable via YAML files or environment variables.
-- **Minimal Dependencies**: Avoids unnecessary dependencies for lightweight container images.
 
 ## Table of Contents
 
