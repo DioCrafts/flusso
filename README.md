@@ -10,7 +10,6 @@
   [![GitHub Issues](https://img.shields.io/github/issues/diocrafts/flusso)](https://github.com/diocrafts/flusso/issues)
   [![GitHub Forks](https://img.shields.io/github/forks/diocrafts/flusso?style=social)](https://github.com/diocrafts/flusso/network/members)
   [![Last Commit](https://img.shields.io/github/last-commit/diocrafts/flusso)](https://github.com/diocrafts/flusso/commits/main)
-  [![Docker Image Size](https://img.shields.io/docker/image-size/diocrafts/flusso-ingress-controller/latest)](https://hub.docker.com/r/diocrafts/flusso-ingress-controller)
 
 </div>
 
