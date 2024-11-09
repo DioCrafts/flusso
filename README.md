@@ -1,10 +1,17 @@
 
 # Flusso - High-Performance Kubernetes Ingress Controller in Rust
 
-[![Build Status](https://img.shields.io/github/workflow/status/diocrafts/flusso/Build%20and%20Test)](https://github.com/diocrafts/flusso/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Docker Pulls](https://img.shields.io/docker/pulls/diocrafts/flusso-ingress-controller)](https://hub.docker.com/r/diocrafts/flusso-ingress-controller)
-[![Latest Release](https://img.shields.io/github/release/diocrafts/flusso.svg)](https://github.com/diocrafts/flusso/releases)
+<div align="center">
+  
+  [![Build Status](https://img.shields.io/github/actions/workflow/status/diocrafts/flusso/build-and-test.yml?branch=main)](https://github.com/diocrafts/flusso/actions)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+  [![Docker Pulls](https://img.shields.io/docker/pulls/diocrafts/flusso-ingress-controller)](https://hub.docker.com/r/diocrafts/flusso-ingress-controller)
+  [![Latest Release](https://img.shields.io/github/release/diocrafts/flusso.svg)](https://github.com/diocrafts/flusso/releases)
+  [![GitHub Stars](https://img.shields.io/github/stars/diocrafts/flusso?style=social)](https://github.com/diocrafts/flusso/stargazers)
+
+</div>
+
+
 
 Flusso is an open-source, high-performance Ingress Controller for Kubernetes, built in **Rust**. Designed to provide a **lightweight**, **secure**, and **scalable** alternative to popular ingress solutions like Traefik and NGINX, Flusso delivers optimized performance and efficient load balancing tailored for cloud-native environments.
 
