@@ -1,35 +1,38 @@
-// Motor de enrutamiento y lógica de rutas
-// src/proxy/router.rs
+//! Router module for managing request routing to backend servers.
+//!
+//! The `Router` struct stores route mappings, associating paths with backend servers.
 
 use std::collections::HashMap;
 use std::net::SocketAddr;
 
+/// Represents a route with a path and its associated backend server address.
 #[derive(Clone, Debug)]
 pub struct Route {
     pub path: String,
     pub backend: SocketAddr,
 }
 
+/// A router that maps paths to backend servers.
 #[derive(Default)]
 pub struct Router {
     routes: HashMap<String, Route>,
 }
 
 impl Router {
-    /// Crea un nuevo enrutador vacío.
+    /// Creates a new, empty router.
     pub fn new() -> Self {
         Self {
             routes: HashMap::new(),
         }
     }
 
-    /// Agrega una nueva ruta al enrutador.
+    /// Adds a route with a specified path and backend server address.
     pub fn add_route(&mut self, path: String, backend: SocketAddr) {
         let route = Route { path: path.clone(), backend };
         self.routes.insert(path, route);
     }
 
-    /// Obtiene el backend correspondiente a una ruta.
+    /// Retrieves the backend address for a given request path.
     pub fn get_backend(&self, request_path: &str) -> Option<SocketAddr> {
         for (path, route) in &self.routes {
             if request_path.starts_with(path) {

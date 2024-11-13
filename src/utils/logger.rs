@@ -1,7 +1,7 @@
 // Configuración y administración de logs
 // src/utils/logger.rs
 
-use log::{info, warn, error, debug, LevelFilter};
+use log::{info, warn, error, debug};
 use env_logger::Builder;
 use std::env;
 

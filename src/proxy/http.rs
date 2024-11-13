@@ -1,4 +1,7 @@
-// src/proxy/http.rs
+//! HTTP Proxy module to forward client requests to backend servers.
+//!
+//! The `HttpProxy` struct uses a load balancer to select a backend and forwards
+//! requests to the chosen backend. It handles HTTP headers, body, and logs request details.
 
 use reqwest::{Client, Response};
 use reqwest::header::HeaderMap;
@@ -7,12 +10,17 @@ use super::load_balancer::LoadBalancer;
 use std::sync::Arc;
 use bytes::Bytes;
 
+/// An HTTP proxy that forwards requests to selected backend servers.
 pub struct HttpProxy {
     client: Client,
     load_balancer: Arc<LoadBalancer>,
 }
 
 impl HttpProxy {
+    /// Creates a new `HttpProxy` instance with a load balancer.
+    ///
+    /// # Parameters
+    /// - `load_balancer`: Shared `LoadBalancer` to manage backend selection.
     pub fn new(load_balancer: Arc<LoadBalancer>) -> Self {
         Self {
             client: Client::new(),
@@ -20,7 +28,16 @@ impl HttpProxy {
         }
     }
 
-    /// Reenvía una solicitud HTTP completa al backend seleccionado por el balanceador.
+    /// Forwards a full HTTP request to a backend selected by the load balancer.
+    ///
+    /// # Parameters
+    /// - `path`: The path to forward the request to on the backend.
+    /// - `method`: The HTTP method for the request (e.g., GET, POST).
+    /// - `headers`: The headers to include in the forwarded request.
+    /// - `body`: An optional body for the request.
+    ///
+    /// # Returns
+    /// A `Result` containing the `Response` from the backend or an error.
     pub async fn forward_request(
         &self,
         path: &str,
@@ -28,31 +45,25 @@ impl HttpProxy {
         headers: HeaderMap,
         body: Option<Bytes>,
     ) -> Result<Response, Box<dyn Error>> {
-
-        // Log para indicar que se está intentando seleccionar un backend
-        println!("Seleccionando backend para la solicitud...");
+        println!("Selecting backend for request...");
 
         if let Some(backend) = self.load_balancer.select_backend() {
             let url = format!("http://{}{}", backend, path);
-
-            // Añade logs para ver la URL completa y detalles de la solicitud
-            println!("Intentando reenviar a URL completa: {}", url);
-            println!("Método HTTP: {:?}", method);
-            println!("Cabeceras: {:?}", headers);
+            println!("Forwarding to URL: {}", url);
+            println!("HTTP Method: {:?}", method);
+            println!("Headers: {:?}", headers);
 
             let mut request_builder = self.client.request(method, &url).headers(headers);
 
-            // Agrega el cuerpo si existe
             if let Some(b) = body {
                 request_builder = request_builder.body(b.clone());
-                println!("Cuerpo de la solicitud: {:?}", b);
+                println!("Request Body: {:?}", b);
             }
 
-            // Enviar la solicitud y loggear la respuesta
             let response = request_builder.send().await;
-            match response {
-                Ok(ref resp) => println!("Respuesta del backend: {:?}", resp),
-                Err(ref err) => println!("Error al obtener respuesta del backend: {:?}", err),
+            match &response {
+                Ok(resp) => println!("Backend response: {:?}", resp),
+                Err(err) => println!("Error in backend response: {:?}", err),
             }
             response.map_err(|e| e.into())
         } else {
@@ -60,4 +71,3 @@ impl HttpProxy {
         }
     }
 }
-

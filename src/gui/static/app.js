@@ -1,10 +1,11 @@
 // src/gui/static/app.js
 
-// Obtiene la lista de backends y actualiza el contenido de la lista en la GUI.
+// Fetches the list of backends and updates the content on the dashboard.
 async function fetchBackends() {
     const response = await fetch('/backends');
     const backends = await response.json();
 
+    // Update the backend list in the HTML
     const backendList = document.getElementById('backend-list');
     backendList.innerHTML = '';
 
@@ -12,8 +13,8 @@ async function fetchBackends() {
         const listItem = document.createElement('li');
         listItem.innerHTML = `
             <strong>${backend.address}</strong><br>
-            Estado: ${backend.status}<br>
-            Conexiones: ${backend.connections}
+            Status: ${backend.status}<br>
+            Connections: ${backend.connections}
         `;
         backendList.appendChild(listItem);
     });
@@ -21,11 +22,11 @@ async function fetchBackends() {
     updateChart(backends);
 }
 
-// Llama a la función `fetchBackends` al cargar la página y cada 5 segundos.
+// Calls `fetchBackends` on page load and every 5 seconds.
 window.addEventListener('DOMContentLoaded', fetchBackends);
 setInterval(fetchBackends, 5000);
 
-// Actualiza el gráfico con los datos de los backends
+// Updates the chart with backend connection data.
 function updateChart(backends) {
     const labels = backends.map(backend => backend.address);
     const data = backends.map(backend => backend.connections);
@@ -35,16 +36,15 @@ function updateChart(backends) {
     chart.update();
 }
 
-
-// Inicializa el gráfico de conexiones
+// Initializes the chart for displaying active connections.
 const ctx = document.getElementById('connectionsChart').getContext('2d');
 const chart = new Chart(ctx, {
     type: 'bar',
     data: {
-        labels: [], // Será actualizado con las direcciones de los backends
+        labels: [], // Updated with backend addresses
         datasets: [{
-            label: 'Conexiones Activas',
-            data: [], // Será actualizado con el número de conexiones de cada backend
+            label: 'Active Connections',
+            data: [], // Updated with the number of connections per backend
             backgroundColor: 'rgba(75, 192, 192, 0.2)',
             borderColor: 'rgba(75, 192, 192, 1)',
             borderWidth: 1
@@ -56,7 +56,7 @@ const chart = new Chart(ctx, {
                 beginAtZero: true,
                 title: {
                     display: true,
-                    text: 'Número de Conexiones'
+                    text: 'Number of Connections'
                 }
             },
             x: {
@@ -68,4 +68,3 @@ const chart = new Chart(ctx, {
         }
     }
 });
-

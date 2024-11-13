@@ -1,16 +1,20 @@
-// Cache de respuestas (opcional)
-// src/proxy/cache.rs
+//! Cache module for storing and retrieving HTTP responses.
+//!
+//! The `Cache` struct provides a time-limited storage of responses using a
+//! specified time-to-live (TTL) duration.
 
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
+/// Represents an entry in the cache with response data and a timestamp.
 #[derive(Clone)]
 pub struct CacheEntry {
-    pub response: Vec<u8>,        // Almacena la respuesta en bytes
-    pub timestamp: Instant,       // Marca el tiempo de almacenamiento
+    pub response: Vec<u8>,       // Stores response in bytes
+    pub timestamp: Instant,      // Marks the storage time
 }
 
+/// Cache for HTTP responses with a time-to-live (TTL) for entries.
 #[derive(Clone)]
 pub struct Cache {
     data: Arc<Mutex<HashMap<String, CacheEntry>>>,
@@ -18,6 +22,7 @@ pub struct Cache {
 }
 
 impl Cache {
+    /// Creates a new cache with the specified TTL (in seconds).
     pub fn new(ttl_seconds: u64) -> Self {
         Self {
             data: Arc::new(Mutex::new(HashMap::new())),
@@ -25,7 +30,7 @@ impl Cache {
         }
     }
 
-    /// Almacena una respuesta en la caché.
+    /// Stores a response in the cache with a unique key.
     pub fn store(&self, key: String, response: Vec<u8>) {
         let entry = CacheEntry {
             response,
@@ -35,26 +40,23 @@ impl Cache {
         data.insert(key, entry);
     }
 
-    /// Recupera una respuesta de la caché, si es válida (no expirada).
+    /// Retrieves a response from the cache if it is still valid.
     pub fn retrieve(&self, key: &str) -> Option<Vec<u8>> {
         let mut data = self.data.lock().unwrap();
-        
         if let Some(entry) = data.get(key) {
             if entry.timestamp.elapsed() < self.ttl {
                 return Some(entry.response.clone());
             } else {
-                // Remueve la entrada si ha expirado
                 data.remove(key);
             }
         }
         None
     }
 
-    /// Limpia las entradas expiradas de la caché.
+    /// Cleans expired entries from the cache.
     pub fn clean_expired(&self) {
         let mut data = self.data.lock().unwrap();
         let ttl = self.ttl;
-
         data.retain(|_, entry| entry.timestamp.elapsed() < ttl);
     }
 }

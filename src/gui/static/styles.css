@@ -1,5 +1,6 @@
 /* src/gui/static/styles.css */
 
+/* Basic styles for body and layout */
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f9;
@@ -8,6 +9,7 @@ body {
     color: #333;
 }
 
+/* Styles for the header */
 header {
     background-color: #4CAF50;
     color: white;
@@ -15,14 +17,17 @@ header {
     text-align: center;
 }
 
+/* Styles for main content */
 main {
     padding: 1rem;
 }
 
+/* Styles for headers */
 h1, h2 {
     font-weight: normal;
 }
 
+/* List styles for displaying backend information */
 #backend-list {
     list-style-type: none;
     padding: 0;
@@ -33,7 +38,7 @@ h1, h2 {
     border-bottom: 1px solid #ccc;
 }
 
+/* Styles for the chart section */
 #backend-chart {
     margin-top: 1rem;
 }
-
