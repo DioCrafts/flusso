@@ -19,30 +19,32 @@ impl<'a> TlsConfig<'a> {
     }
 }
 
-/// Carga los certificados desde el archivo
+/// Loads certificates from the specified file.
 fn load_certs(path: &str) -> io::Result<Vec<CertificateDer<'static>>> {
     let cert_file = File::open(path)?;
     let mut reader = BufReader::new(cert_file);
-    let certs = certs(&mut reader)
+
+    let certs = certs(&mut reader).collect::<Result<Vec<_>, _>>()
         .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "Invalid certificate"))?;
-    Ok(certs
-        .into_iter()
-        .map(|cert| CertificateDer::from(cert))
-        .collect())
+    
+    Ok(certs.into_iter().map(CertificateDer::from).collect())
 }
 
-/// Carga la clave privada desde el archivo
+
+/// Loads the private key from the specified file.
 fn load_private_key(path: &str) -> io::Result<PrivateKeyDer<'static>> {
     let key_file = File::open(path)?;
     let mut reader = BufReader::new(key_file);
-    let keys = rsa_private_keys(&mut reader)
+
+    let keys = rsa_private_keys(&mut reader).collect::<Result<Vec<_>, _>>()
         .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "Invalid private key"))?;
+    
     if let Some(key) = keys.into_iter().next() {
-        // Convertimos la clave a PrivatePkcs1KeyDer antes de pasarlo a PrivateKeyDer
         let pkcs1_key = PrivatePkcs1KeyDer::from(key);
         Ok(PrivateKeyDer::from(pkcs1_key))
     } else {
         Err(io::Error::new(io::ErrorKind::InvalidData, "No private key found"))
     }
 }
+
 

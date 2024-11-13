@@ -1,0 +1,61 @@
+name: Build and Push Docker Image with Automated Versioning
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Git for tag management
+        run: |
+          git config --global user.email "ci-bot@no-reply.github.com"
+          git config --global user.name "GitHub CI Bot"
+
+      - name: Extract Current Version from Git Tags
+        id: version
+        run: |
+          latest_tag=$(git describe --tags --abbrev=0)
+          if [ -z "$latest_tag" ]; then
+            latest_tag="0.0.0"
+          fi
+          IFS='.' read -r major minor patch <<< "$latest_tag"
+          patch=$((patch + 1))  # Increase the patch version; adjust as you prefer
+          new_version="$major.$minor.$patch"
+          echo "new_version=$new_version" >> $GITHUB_ENV
+
+      - name: Tag New Version in Git
+        run: |
+          git tag ${{ env.new_version }}
+          git push origin ${{ env.new_version }}
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+
+      - name: Build with LTO and PGO
+        run: |
+          export RUSTFLAGS="-Cprofile-use=flusso.profdata"
+          cargo build --release
+          unset RUSTFLAGS
+
+      - name: Package Optimized Binary in Docker Image
+        run: |
+          docker build -t diocrafts/flusso-ingress-controller:${{ env.new_version }} .
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push Docker Image with New Version
+        run: |
+          docker push diocrafts/flusso-ingress-controller:${{ env.new_version }}
