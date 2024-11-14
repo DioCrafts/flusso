@@ -16,6 +16,11 @@ spec:
       port: 8081
       targetPort: 8081
       protocol: TCP
+    {{- if .Values.apiGateway.enabled }}
+    - name: api-gateway
+      port: 8082
+      targetPort: {{ .Values.apiGateway.port }}
+      protocol: TCP
+    {{- end }}
   selector:
-    app: {{ include "flusso-ingress-controller.name" . }}
-
+    app: {{ include "flusso-ingress-controller.name" . }}  # Add the selector here

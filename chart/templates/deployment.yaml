@@ -1,4 +1,3 @@
-# chart/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -23,8 +22,17 @@ spec:
           ports:
             - containerPort: 8080
             - containerPort: 8081
+            {{- if .Values.apiGateway.enabled }}
+            - containerPort: {{ .Values.apiGateway.port }}
+            {{- end }}
           env:
             - name: TLS_ENABLED
               value: "{{ .Values.env.TLS_ENABLED }}"
             - name: SERVER_ADDR
               value: "{{ .Values.env.SERVER_ADDR }}"
+            {{- if .Values.apiGateway.enabled }}
+            - name: API_GATEWAY_TLS_ENABLED
+              value: "{{ .Values.apiGateway.tlsEnabled }}"
+            - name: API_GATEWAY_PORT
+              value: "{{ .Values.apiGateway.port }}"
+            {{- end }}

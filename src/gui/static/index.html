@@ -9,16 +9,22 @@
 <body>
     <header>
         <h1>Flusso Dashboard</h1>
-        <p>Backend status and routes</p>
+        <p>Backend and Gateway status</p>
     </header>
+    <nav>
+        <button onclick="showTab('backend-tab')">Backends</button>
+        <button onclick="showTab('gateway-tab')">Gateways</button>
+    </nav>
     <main>
-        <section id="backend-status">
+        <section id="backend-tab" class="tab-content">
             <h2>Active Backends</h2>
             <ul id="backend-list"></ul>
-        </section>
-        <section id="backend-chart">
             <h2>Backend Connection Load</h2>
             <canvas id="connectionsChart"></canvas>
+        </section>
+        <section id="gateway-tab" class="tab-content" style="display:none;">
+            <h2>Gateways</h2>
+            <ul id="gateway-list"></ul>
         </section>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

@@ -8,3 +8,4 @@ pub mod health_check;
 pub mod metrics;
 pub mod gui;
 pub mod utils;
+pub mod gateway;

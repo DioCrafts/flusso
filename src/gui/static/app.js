@@ -1,30 +1,42 @@
-// src/gui/static/app.js
-
 // Fetches the list of backends and updates the content on the dashboard.
 async function fetchBackends() {
     const response = await fetch('/backends');
     const backends = await response.json();
 
-    // Update the backend list in the HTML
     const backendList = document.getElementById('backend-list');
     backendList.innerHTML = '';
-
     backends.forEach(backend => {
         const listItem = document.createElement('li');
-        listItem.innerHTML = `
-            <strong>${backend.address}</strong><br>
-            Status: ${backend.status}<br>
-            Connections: ${backend.connections}
-        `;
+        listItem.innerHTML = `<strong>${backend.address}</strong><br>Status: ${backend.status}<br>Connections: ${backend.connections}`;
         backendList.appendChild(listItem);
     });
 
     updateChart(backends);
 }
 
-// Calls `fetchBackends` on page load and every 5 seconds.
-window.addEventListener('DOMContentLoaded', fetchBackends);
-setInterval(fetchBackends, 5000);
+// Fetches the list of gateways and updates the Gateway tab on the dashboard.
+async function fetchGateways() {
+    const response = await fetch('/gateways');
+    const gateways = await response.json();
+
+    const gatewayList = document.getElementById('gateway-list');
+    gatewayList.innerHTML = '';
+    gateways.forEach(gateway => {
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `<strong>${gateway.name}</strong><br>Status: ${gateway.status}<br>Routes: ${gateway.routes}`;
+        gatewayList.appendChild(listItem);
+    });
+}
+
+// Calls `fetchBackends` and `fetchGateways` on page load and every 5 seconds.
+window.addEventListener('DOMContentLoaded', () => {
+    fetchBackends();
+    fetchGateways();
+});
+setInterval(() => {
+    fetchBackends();
+    fetchGateways();
+}, 5000);
 
 // Updates the chart with backend connection data.
 function updateChart(backends) {
@@ -54,16 +66,10 @@ const chart = new Chart(ctx, {
         scales: {
             y: {
                 beginAtZero: true,
-                title: {
-                    display: true,
-                    text: 'Number of Connections'
-                }
+                title: { display: true, text: 'Number of Connections' }
             },
             x: {
-                title: {
-                    display: true,
-                    text: 'Backends'
-                }
+                title: { display: true, text: 'Backends' }
             }
         }
     }
