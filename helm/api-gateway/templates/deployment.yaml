@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "api-gateway.fullname" . }}
+  labels:
+    app: {{ include "api-gateway.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "api-gateway.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "api-gateway.name" . }}
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      containers:
+        - name: api-gateway
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 8080
+            - containerPort: 8081
+            - containerPort: {{ .Values.apiGateway.port }}
+          env:
+            - name: TLS_ENABLED
+              value: "{{ .Values.env.TLS_ENABLED }}"
+            - name: SERVER_ADDR
+              value: "{{ .Values.env.SERVER_ADDR }}"
+            - name: API_GATEWAY_TLS_ENABLED
+              value: "{{ .Values.apiGateway.tlsEnabled }}"
+            - name: API_GATEWAY_PORT
+              value: "{{ .Values.apiGateway.port }}"

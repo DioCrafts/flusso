@@ -1,0 +1,27 @@
+# chart/values.yaml
+replicaCount: 1
+
+image:
+  repository: diocrafts/flusso-ingress-controller
+  tag: v0.0.40
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  name: flusso-ingress
+
+service:
+  type: NodePort
+  port: 80
+  targetPort: 8080
+
+ingressClass: flusso
+
+env:
+  TLS_ENABLED: "true"
+  SERVER_ADDR: "0.0.0.0:8080"
+
+apiGateway:
+  enabled: true
+  tlsEnabled: true
+  port: 8082

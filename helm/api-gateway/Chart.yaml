@@ -1,0 +1,6 @@
+apiVersion: v2
+name: api-gateway
+description: A Helm chart for Flusso API Gateway
+version: 0.1.0
+appVersion: "1.0"
+

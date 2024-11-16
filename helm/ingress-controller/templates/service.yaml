@@ -1,0 +1,26 @@
+# chart/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "flusso-ingress-controller.fullname" . }}
+  labels:
+    app: {{ include "flusso-ingress-controller.name" . }}
+spec:
+  type: LoadBalancer
+  ports:
+    - name: main
+      port: 80
+      targetPort: 8080
+      protocol: TCP
+    - name: dashboard
+      port: 8081
+      targetPort: 8081
+      protocol: TCP
+    {{- if .Values.apiGateway.enabled }}
+    - name: api-gateway
+      port: 8082
+      targetPort: {{ .Values.apiGateway.port }}
+      protocol: TCP
+    {{- end }}
+  selector:
+    app: {{ include "flusso-ingress-controller.name" . }}  # Add the selector here

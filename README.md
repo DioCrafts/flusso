@@ -1,7 +1,7 @@
 
-# 🚀 Flusso - Secure, High-Performance Kubernetes Ingress Controller in Rust 🦀🔒
+# 🚀 Flusso - Secure, High-Performance Kubernetes Ingress Controller and API Gateway in Rust 🦀🔒
 
-**Flusso** is a powerful, secure, and high-performance Ingress Controller for Kubernetes, written in Rust. Tailored for modern cloud-native environments, Flusso offers a lightweight alternative to popular ingress solutions.
+**Flusso** is a secure, high-performance solution for Kubernetes, combining the functionalities of an **Ingress Controller** and an **API Gateway**. Written in **Rust**, Flusso is designed to meet the needs of modern cloud-native environments, offering a lightweight and efficient alternative to traditional solutions.
 
 <div align="center">
   
@@ -41,33 +41,64 @@
 
 ## Installation
 
-To get started with Flusso, you can use Docker or Helm to deploy the Ingress Controller in your Kubernetes cluster.
+Flusso provides two components for deployment: the **Ingress Controller** and the **API Gateway**. You can choose to deploy either or both of them depending on your needs. Both components can be deployed using **Helm** or **Docker**, and here are the instructions for each.
 
-### Docker Installation
+### 1. **Install Ingress Controller using Helm**
 
-1. Pull the Docker image:
-   ```sh
-   docker pull diocrafts/flusso-ingress-controller:latest
+To install the Flusso Ingress Controller in your Kubernetes cluster, you can use Helm. Follow these steps:
+
+1. **Add the Flusso Helm Chart repository:**
+
+   ```bash
+   helm repo add flusso https://diocrafts.github.io/flusso
+   helm repo update
    ```
 
-2. Run the Docker container:
-   ```sh
-   docker run -p 8080:8080 -p 8081:8081 -e SERVER_ADDR="0.0.0.0:8080" -e TLS_ENABLED="true" diocrafts/flusso-ingress-controller
+2. **Install the Ingress Controller:**
+
+   ```bash
+   helm install flusso-ingress-controller flusso/flusso-ingress-controller        --namespace ingress-system        --create-namespace
    ```
 
-### Kubernetes Installation with Helm
+   This will install the Flusso Ingress Controller in the `ingress-system` namespace. You can customize your deployment by modifying values in the Helm chart.
 
-1. Add your Helm repository (if not added yet):
-   ```sh
-   helm repo add flusso-repo https://your-helm-repo.com/charts
+3. **Verify the deployment:**
+
+   Check the status of the Ingress Controller to ensure it is running:
+
+   ```bash
+   kubectl get pods -n ingress-system
    ```
 
-2. Install Flusso Ingress Controller:
-   ```sh
-   helm install flusso-ingress flusso-repo/flusso-ingress
+---
+
+### 2. **Install API Gateway using Helm**
+
+To install the Flusso API Gateway in your Kubernetes cluster, follow these steps:
+
+1. **Add the Flusso Helm Chart repository:**
+
+   ```bash
+   helm repo add flusso https://diocrafts.github.io/flusso
+   helm repo update
    ```
 
-For more configuration options, refer to the [values.yaml](chart/values.yaml).
+2. **Install the API Gateway:**
+
+   ```bash
+   helm install flusso-api-gateway flusso/flusso-api-gateway        --namespace api-gateway-system        --create-namespace
+   ```
+
+   This will install the Flusso API Gateway in the `api-gateway-system` namespace. You can modify the Helm chart values to customize your deployment.
+
+3. **Verify the deployment:**
+
+   Check the status of the API Gateway to ensure it is running:
+
+   ```bash
+   kubectl get pods -n api-gateway-system
+   ```
+
 
 ---
 
