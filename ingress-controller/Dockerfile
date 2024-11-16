@@ -1,5 +1,5 @@
 # Etapa de construcción
-FROM rust:latest as builder
+FROM rust:latest AS builder
 WORKDIR /app
 
 # Instala musl-tools para permitir la compilación estática

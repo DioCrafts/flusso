@@ -1,0 +1,24 @@
+replicaCount: 1
+
+image:
+  repository: diocrafts/flusso-api-gateway
+  tag: 0.0.41
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  name: flusso-api-gateway
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+apiGateway:
+  enabled: true
+  port: 8082
+  tlsEnabled: false
+
+env:
+  TLS_ENABLED: "true"
+  SERVER_ADDR: "0.0.0.0:8080"

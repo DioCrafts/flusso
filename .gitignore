@@ -23,3 +23,7 @@
 *.dylib        # Dynamic libraries on MacOS
 *.stackdump    # Stack dumps on Windows (crash logs)
 *.profraw      # Profile-guided optimization data, generated during profiling
+
+# Ignore any other target directories (including for the api-gateway and ingress module)
+api-gateway/target/**
+ingress-controller/target/**
