@@ -25,5 +25,13 @@
 *.profraw      # Profile-guided optimization data, generated during profiling
 
 # Ignore any other target directories (including for the api-gateway and ingress module)
-api-gateway/target/**
+api-gateway/backend/target/**
 ingress-controller/target/**
+
+# Specific rules for api-gateway/frontend
+api-gateway/frontend/node_modules/
+api-gateway/frontend/dist/
+api-gateway/frontend/build/
+api-gateway/frontend/npm-debug.log*
+api-gateway/frontend/yarn-debug.log*
+api-gateway/frontend/yarn-error.log*
