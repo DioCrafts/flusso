@@ -1,10 +1,11 @@
 import axios from 'axios';
 
-// Configura Axios para que apunte al backend
+// Configura Axios para que apunte al API REST en Kubernetes
 const apiClient = axios.create({
-  baseURL: 'http://localhost:3000/api', // Cambia esto si el backend está en otra URL o puerto
+  baseURL: 'http://flusso-api-gateway-api-gateway.default.svc.cluster.local:8081/api', // URL del API REST
 });
 
+// Funciones para consumir la API REST
 export const getMetrics = async () => {
   const response = await apiClient.get('/metrics');
   return response.data;
