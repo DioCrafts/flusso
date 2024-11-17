@@ -23,8 +23,6 @@ WORKDIR /usr/local/bin
 # Copia el binario estático desde la etapa de construcción
 COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/flusso_api_gateway .
 
-# Copia los archivos estáticos
-COPY src/gui/static /usr/local/bin/static
 
 # Exponer los puertos en los que la aplicación escucha
 EXPOSE 8080

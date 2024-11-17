@@ -10,7 +10,7 @@ export default defineConfig({
     port: 5173, // Cambia si hay conflictos de puertos
     open: true, // Abre el navegador automáticamente
     proxy: {
-        '/api': 'http://localhost:3000', // Redirige las solicitudes al backend
+        '/api': 'http://flusso-api-gateway-api-gateway.default.svc.cluster.local:8081', // Redirige las solicitudes al API REST en Kubernetes
       },
   },
 });

@@ -5,19 +5,15 @@ metadata:
   labels:
     app: {{ include "api-gateway.name" . }}
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
     - name: main
       port: 80
       targetPort: 8080
       protocol: TCP
-    - name: dashboard
+    - name: api-rest
       port: 8081
       targetPort: 8081
-      protocol: TCP
-    - name: api-gateway
-      port: 8082
-      targetPort: {{ .Values.apiGateway.port }}
       protocol: TCP
   selector:
     app: {{ include "api-gateway.name" . }}
