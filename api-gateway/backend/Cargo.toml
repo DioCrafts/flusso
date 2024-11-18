@@ -16,6 +16,7 @@ path = "src/main.rs"
 [dependencies]
 # Actix dependencies for web server and web GUI
 actix-web = "4.9.0"
+actix-cors = "0.7.0"
 actix-rt = "2.10.0"
 actix-files = "0.6.6"
 actix-service = "2.0.2"

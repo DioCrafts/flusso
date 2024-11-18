@@ -1,11 +1,9 @@
 import axios from 'axios';
 
-// Configura Axios para que apunte al API REST en Kubernetes
 const apiClient = axios.create({
-  baseURL: 'http://flusso-api-gateway-api-gateway.default.svc.cluster.local:8081/api', // URL del API REST
+  baseURL: '/api', // Redirige automáticamente al backend usando el proxy de Vite
 });
 
-// Funciones para consumir la API REST
 export const getMetrics = async () => {
   const response = await apiClient.get('/metrics');
   return response.data;
