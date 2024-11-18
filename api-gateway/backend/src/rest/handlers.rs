@@ -43,3 +43,14 @@ pub async fn delete_backend(path: web::Path<u32>) -> impl Responder {
     println!("Deleting backend with ID: {}", id);
     HttpResponse::Ok().json(json!({ "message": "Backend deleted", "id": id }))
 }
+
+/// Handler for `GET /api/alerts`
+///
+/// Returns a list of alerts (mocked example data for now).
+pub async fn get_alerts() -> impl Responder {
+    let alerts = json!([
+        { "id": 1, "message": "High latency detected" },
+        { "id": 2, "message": "Backend unreachable" }
+    ]);
+    HttpResponse::Ok().json(alerts)
+}

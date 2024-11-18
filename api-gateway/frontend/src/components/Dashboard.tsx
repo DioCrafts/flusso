@@ -12,9 +12,30 @@ import {
   LinearProgress 
 } from '@mui/material';
 import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
 import { getMetrics, getAlerts } from '../apiClient'; // Usa el cliente API
 
-// Define interfaces for types
+// Registrar componentes y escalas de Chart.js
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
+// Define interfaces para tipos
 interface Metric {
   name: string;
   value: string | number;
@@ -38,6 +59,28 @@ const generateChartData = () => ({
     },
   ],
 });
+
+// Opciones del gráfico
+const chartOptions = {
+  responsive: true,
+  plugins: {
+    legend: {
+      position: 'top',
+    },
+    title: {
+      display: true,
+      text: 'Traffic Over Time',
+    },
+  },
+  scales: {
+    x: {
+      type: 'category', // Escala categórica en el eje X
+    },
+    y: {
+      beginAtZero: true, // Empieza en 0 en el eje Y
+    },
+  },
+};
 
 const Dashboard: React.FC = () => {
   const [metrics, setMetrics] = useState<Metric[]>([]);
@@ -145,7 +188,7 @@ const Dashboard: React.FC = () => {
             <Typography variant="h5" gutterBottom>
               Traffic Over Time
             </Typography>
-            <Line data={generateChartData()} />
+            <Line data={generateChartData()} options={chartOptions} />
           </CardContent>
         </Card>
       </Grid>
