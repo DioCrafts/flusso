@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  Grid, 
-  Card, 
-  CardContent, 
-  Typography, 
-  Table, 
-  TableHead, 
-  TableRow, 
-  TableCell, 
-  TableBody, 
-  LinearProgress 
+import {
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  LinearProgress,
 } from '@mui/material';
 import { Line } from 'react-chartjs-2';
 import {
@@ -22,7 +22,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { getMetrics, getAlerts } from '../apiClient'; // Usa el cliente API
+import { observabilityApi } from '../apiClient'; // Importa el cliente API
 
 // Registrar componentes y escalas de Chart.js
 ChartJS.register(
@@ -91,12 +91,12 @@ const Dashboard: React.FC = () => {
   // Fetch data from API
   const fetchDashboardData = async () => {
     try {
-      const [metricsData, alertsData] = await Promise.all([
-        getMetrics(),
-        getAlerts(),
+      const [metricsResponse, alertsResponse] = await Promise.all([
+        observabilityApi.getMetrics(),
+        observabilityApi.getAlerts(),
       ]);
-      setMetrics(metricsData);
-      setAlerts(alertsData);
+      setMetrics(metricsResponse.data); // Ajusta según la estructura de los datos
+      setAlerts(alertsResponse.data); // Ajusta según la estructura de los datos
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
       setError('Failed to load dashboard data.');
