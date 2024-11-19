@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Grid,
   Card,
@@ -15,107 +15,52 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  Select,
-  MenuItem,
-  LinearProgress,
-  Switch,
 } from '@mui/material';
-import axios from 'axios';
+import { getSecurityPolicies, addSecurityPolicy, deleteSecurityPolicy } from '../apiClient';
 
-// Define interfaces for security policies
-interface SecurityPolicy {
-  id: number;
+interface Policy {
   name: string;
-  type: string;
-  status: boolean; // Active or disabled
-  details: string; // Extra details, e.g., IPs, JWT provider
+  description: string;
+  active: boolean;
+  rules: string[];
 }
 
 const Security: React.FC = () => {
-  const [policies, setPolicies] = useState<SecurityPolicy[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [newPolicy, setNewPolicy] = useState({
+  const [policies, setPolicies] = useState<Policy[]>([]);
+  const [newPolicy, setNewPolicy] = useState<Policy>({
     name: '',
-    type: 'IP Blocking',
-    details: '',
-    status: true,
+    description: '',
+    active: true,
+    rules: [],
   });
-
-  // Fetch policies from API
-  const fetchPolicies = async () => {
-    try {
-      const response = await axios.get('/api/security'); // Replace with your API endpoint
-      setPolicies(response.data);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching policies:', error);
-      setLoading(false);
-    }
-  };
+  const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => {
+    const fetchPolicies = async () => {
+      const response = await getSecurityPolicies();
+      setPolicies(response.data);
+    };
     fetchPolicies();
   }, []);
 
-  // Handle dialog state
-  const handleDialogOpen = () => {
-    setOpenDialog(true);
-  };
-
-  const handleDialogClose = () => {
-    setOpenDialog(false);
-    setNewPolicy({ name: '', type: 'IP Blocking', details: '', status: true });
-  };
-
-  // Handle adding a new policy
   const handleAddPolicy = async () => {
-    try {
-      const response = await axios.post('/api/security', newPolicy); // Replace with your API endpoint
-      setPolicies([...policies, response.data]);
-      handleDialogClose();
-    } catch (error) {
-      console.error('Error adding policy:', error);
-    }
+    await addSecurityPolicy(newPolicy);
+    setPolicies([...policies, newPolicy]);
+    setOpenDialog(false);
+    setNewPolicy({ name: '', description: '', active: true, rules: [] });
   };
 
-  // Handle deleting a policy
-  const handleDeletePolicy = async (id: number) => {
-    try {
-      await axios.delete(`/api/security/${id}`); // Replace with your API endpoint
-      setPolicies(policies.filter((policy) => policy.id !== id));
-    } catch (error) {
-      console.error('Error deleting policy:', error);
-    }
+  const handleDeletePolicy = async (name: string) => {
+    await deleteSecurityPolicy(name);
+    setPolicies(policies.filter((policy) => policy.name !== name));
   };
-
-  // Handle toggling policy status
-  const handleTogglePolicy = async (id: number, currentStatus: boolean) => {
-    try {
-      await axios.patch(`/api/security/${id}`, { status: !currentStatus }); // Replace with your API endpoint
-      setPolicies(
-        policies.map((policy) =>
-          policy.id === id ? { ...policy, status: !currentStatus } : policy
-        )
-      );
-    } catch (error) {
-      console.error('Error toggling policy status:', error);
-    }
-  };
-
-  if (loading) {
-    return <LinearProgress />;
-  }
 
   return (
     <Grid container spacing={3}>
       <Grid item xs={12}>
-        <Typography variant="h4" gutterBottom>
-          Security Policies
-        </Typography>
+        <Typography variant="h4">Security</Typography>
       </Grid>
 
-      {/* Table of Policies */}
       <Grid item xs={12}>
         <Card>
           <CardContent>
@@ -123,29 +68,20 @@ const Security: React.FC = () => {
               <TableHead>
                 <TableRow>
                   <TableCell>Name</TableCell>
-                  <TableCell>Type</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Details</TableCell>
+                  <TableCell>Description</TableCell>
                   <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {policies.map((policy) => (
-                  <TableRow key={policy.id}>
+                {policies.map((policy, index) => (
+                  <TableRow key={index}>
                     <TableCell>{policy.name}</TableCell>
-                    <TableCell>{policy.type}</TableCell>
-                    <TableCell>
-                      <Switch
-                        checked={policy.status}
-                        onChange={() => handleTogglePolicy(policy.id, policy.status)}
-                      />
-                    </TableCell>
-                    <TableCell>{policy.details}</TableCell>
+                    <TableCell>{policy.description}</TableCell>
                     <TableCell>
                       <Button
                         variant="outlined"
                         color="error"
-                        onClick={() => handleDeletePolicy(policy.id)}
+                        onClick={() => handleDeletePolicy(policy.name)}
                       >
                         Delete
                       </Button>
@@ -158,15 +94,13 @@ const Security: React.FC = () => {
         </Card>
       </Grid>
 
-      {/* Add Policy Button */}
       <Grid item xs={12}>
-        <Button variant="contained" color="primary" onClick={handleDialogOpen}>
+        <Button variant="contained" color="primary" onClick={() => setOpenDialog(true)}>
           Add Policy
         </Button>
       </Grid>
 
-      {/* Add Policy Dialog */}
-      <Dialog open={openDialog} onClose={handleDialogClose}>
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
         <DialogTitle>Add New Security Policy</DialogTitle>
         <DialogContent>
           <TextField
@@ -176,28 +110,16 @@ const Security: React.FC = () => {
             value={newPolicy.name}
             onChange={(e) => setNewPolicy({ ...newPolicy, name: e.target.value })}
           />
-          <Select
-            label="Type"
-            fullWidth
-            margin="normal"
-            value={newPolicy.type}
-            onChange={(e) => setNewPolicy({ ...newPolicy, type: e.target.value })}
-          >
-            <MenuItem value="IP Blocking">IP Blocking</MenuItem>
-            <MenuItem value="Rate Limiting">Rate Limiting</MenuItem>
-            <MenuItem value="JWT Authentication">JWT Authentication</MenuItem>
-          </Select>
           <TextField
-            label="Details"
+            label="Description"
             fullWidth
             margin="normal"
-            value={newPolicy.details}
-            onChange={(e) => setNewPolicy({ ...newPolicy, details: e.target.value })}
-            helperText="Example: IP ranges, JWT provider URL, or rate limits"
+            value={newPolicy.description}
+            onChange={(e) => setNewPolicy({ ...newPolicy, description: e.target.value })}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleDialogClose} color="secondary">
+          <Button onClick={() => setOpenDialog(false)} color="secondary">
             Cancel
           </Button>
           <Button onClick={handleAddPolicy} color="primary">

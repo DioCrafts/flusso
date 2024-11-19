@@ -1,163 +1,116 @@
 import React, { useEffect, useState } from 'react';
+import { Line } from 'react-chartjs-2';
 import {
-  Grid,
-  Card,
-  CardContent,
-  Typography,
   Table,
   TableHead,
   TableRow,
   TableCell,
   TableBody,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
   LinearProgress,
 } from '@mui/material';
-import { Line, Bar, Pie } from 'react-chartjs-2';
-import axios from 'axios';
+import { getObservabilityMetrics, getObservabilityLogs } from '../apiClient';
 
-// Define interfaces for observability metrics
+// Interfaces
 interface Metric {
+  name: string;
+  value: number;
+  labels: Record<string, string>;
+}
+
+interface LogEntry {
   timestamp: string;
-  rps: number;
-  latency: number;
-  errors: number;
+  client_ip: string;
+  http_code: number;
+  route: string;
+  backend: string;
+  latency_ms: number;
 }
 
 const Observability: React.FC = () => {
   const [metrics, setMetrics] = useState<Metric[]>([]);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch observability data
-  const fetchMetrics = async () => {
-    try {
-      const response = await axios.get('/api/metrics'); // Replace with your API endpoint
-      setMetrics(response.data);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching metrics:', error);
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchMetrics();
+    const fetchData = async () => {
+      try {
+        const [metricsResponse, logsResponse] = await Promise.all([
+          getObservabilityMetrics(),
+          getObservabilityLogs(),
+        ]);
+        setMetrics(metricsResponse.data);
+        setLogs(logsResponse.data);
+      } catch (error) {
+        console.error('Error fetching observability data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   if (loading) {
     return <LinearProgress />;
   }
 
-  // Process data for charts
-  const timestamps = metrics.map((metric) => metric.timestamp);
-  const rpsData = metrics.map((metric) => metric.rps);
-  const latencyData = metrics.map((metric) => metric.latency);
-  const errorData = metrics.map((metric) => metric.errors);
-
-  const lineChartData = {
-    labels: timestamps,
-    datasets: [
-      {
-        label: 'Requests Per Second (RPS)',
-        data: rpsData,
-        borderColor: 'rgba(75, 192, 192, 1)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        tension: 0.4,
-      },
-    ],
-  };
-
-  const barChartData = {
-    labels: timestamps,
-    datasets: [
-      {
-        label: 'Latency (ms)',
-        data: latencyData,
-        backgroundColor: 'rgba(54, 162, 235, 0.7)',
-      },
-    ],
-  };
-
-  const pieChartData = {
-    labels: ['2xx', '4xx', '5xx'],
-    datasets: [
-      {
-        label: 'Error Distribution',
-        data: [
-          metrics.reduce((acc, metric) => acc + (metric.errors > 0 ? metric.errors * 0.5 : 0), 0), // Mock data
-          metrics.reduce((acc, metric) => acc + (metric.errors > 0 ? metric.errors * 0.3 : 0), 0),
-          metrics.reduce((acc, metric) => acc + (metric.errors > 0 ? metric.errors * 0.2 : 0), 0),
-        ],
-        backgroundColor: ['#4caf50', '#ff9800', '#f44336'],
-      },
-    ],
-  };
-
   return (
     <Grid container spacing={3}>
       <Grid item xs={12}>
-        <Typography variant="h4" gutterBottom>
-          Observability Dashboard
-        </Typography>
+        <Typography variant="h4">Observability</Typography>
       </Grid>
 
-      {/* Line Chart for RPS */}
+      {/* Métricas */}
       <Grid item xs={12}>
         <Card>
           <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Requests Per Second (RPS) Over Time
-            </Typography>
-            <Line data={lineChartData} />
+            <Typography variant="h6">Metrics</Typography>
+            <Line
+              data={{
+                labels: metrics.map((metric) => metric.labels.route || 'Unknown'),
+                datasets: [
+                  {
+                    label: 'Requests per Second',
+                    data: metrics.map((metric) => metric.value),
+                    borderColor: 'rgba(75,192,192,1)',
+                    backgroundColor: 'rgba(75,192,192,0.2)',
+                  },
+                ],
+              }}
+            />
           </CardContent>
         </Card>
       </Grid>
 
-      {/* Bar Chart for Latency */}
-      <Grid item xs={12} md={6}>
-        <Card>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Latency Over Time (ms)
-            </Typography>
-            <Bar data={barChartData} />
-          </CardContent>
-        </Card>
-      </Grid>
-
-      {/* Pie Chart for Error Distribution */}
-      <Grid item xs={12} md={6}>
-        <Card>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Error Distribution
-            </Typography>
-            <Pie data={pieChartData} />
-          </CardContent>
-        </Card>
-      </Grid>
-
-      {/* Raw Metrics Table */}
+      {/* Logs */}
       <Grid item xs={12}>
         <Card>
           <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Raw Metrics
-            </Typography>
+            <Typography variant="h6">Logs</Typography>
             <Table>
               <TableHead>
                 <TableRow>
                   <TableCell>Timestamp</TableCell>
-                  <TableCell>Requests Per Second (RPS)</TableCell>
+                  <TableCell>Client IP</TableCell>
+                  <TableCell>HTTP Code</TableCell>
+                  <TableCell>Route</TableCell>
+                  <TableCell>Backend</TableCell>
                   <TableCell>Latency (ms)</TableCell>
-                  <TableCell>Errors</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {metrics.map((metric, index) => (
+                {logs.map((log, index) => (
                   <TableRow key={index}>
-                    <TableCell>{metric.timestamp}</TableCell>
-                    <TableCell>{metric.rps}</TableCell>
-                    <TableCell>{metric.latency}</TableCell>
-                    <TableCell>{metric.errors}</TableCell>
+                    <TableCell>{new Date(log.timestamp).toLocaleString()}</TableCell>
+                    <TableCell>{log.client_ip}</TableCell>
+                    <TableCell>{log.http_code}</TableCell>
+                    <TableCell>{log.route}</TableCell>
+                    <TableCell>{log.backend}</TableCell>
+                    <TableCell>{log.latency_ms}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

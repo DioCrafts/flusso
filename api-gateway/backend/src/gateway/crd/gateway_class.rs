@@ -1,38 +1,37 @@
-// src/gateway/gateway_class.rs
-
-//! Module for managing GatewayClass resources in Kubernetes using the Gateway API.
+//! src/gateway/crd/gateway_class.rs
 //!
-//! This module provides structs and functions to create, list, and manage GatewayClass resources,
-//! which define the types of gateways that can be instantiated in the cluster.
+//! Gestión de GatewayClass en Kubernetes.
+//!
+//! Este módulo proporciona funciones para listar, crear, actualizar y eliminar
+//! recursos de tipo GatewayClass utilizando el cliente de Kubernetes.
 
-use kube::{Api, Client, CustomResourceExt};
-use kube::api::{DynamicObject, ApiResource, ListParams, PostParams, DeleteParams};
+use kube::{Api, Client};
+use kube::api::{ApiResource, DynamicObject, ListParams, PostParams, DeleteParams};
 use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 use kube_derive::CustomResource;
-use thiserror::Error;
 use kube::core::GroupVersionKind;
+use thiserror::Error;
 
-
-/// GatewayClassInnerSpec defines the specification for a GatewayClass resource.
+/// Especificación interna de GatewayClass.
 #[derive(Clone, Debug, Deserialize, Serialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct GatewayClassInnerSpec {
-    pub controller_name: String,
-    pub parameters_ref: Option<ParametersReference>,
+    pub controller_name: String,            // Nombre del controlador asociado
+    pub parameters_ref: Option<ParametersReference>, // Referencia opcional a parámetros adicionales
 }
 
-/// ParametersReference is an optional reference to a custom configuration for the GatewayClass.
+/// Referencia a parámetros opcionales para la configuración del GatewayClass.
 #[derive(Clone, Debug, Deserialize, Serialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ParametersReference {
-    pub api_group: Option<String>,
-    pub kind: String,
-    pub name: String,
-    pub namespace: Option<String>,
+    pub api_group: Option<String>, // Grupo del API
+    pub kind: String,              // Tipo de recurso
+    pub name: String,              // Nombre del recurso
+    pub namespace: Option<String>, // Namespace (si es necesario)
 }
 
-/// Define the `GatewayClass` CRD for the Gateway API.
+/// Definición del recurso personalizado GatewayClass como CRD.
 #[derive(CustomResource, Clone, Debug, Deserialize, Serialize, JsonSchema)]
 #[kube(
     group = "networking.k8s.io",
@@ -44,23 +43,21 @@ pub struct GatewayClassSpec {
     pub spec: GatewayClassInnerSpec,
 }
 
-/// GatewayClassManager is responsible for interacting with `GatewayClass` resources in Kubernetes.
+/// Manager para gestionar GatewayClass en Kubernetes.
 pub struct GatewayClassManager {
     client: Client,
-    ar: ApiResource, // ApiResource defining resource details for DynamicObject
+    ar: ApiResource, // Define el recurso para DynamicObject
 }
 
 impl GatewayClassManager {
+    /// Crea una nueva instancia del manager.
     pub fn new(client: Client) -> Self {
-        // Crea un GroupVersionKind con el grupo, versión y tipo del recurso
-        let gvk = GroupVersionKind::gvk("networking.k8s.io", "v1alpha1", "Gateway");
-
-        // Define el ApiResource para el CRD personalizado Gateway
+        let gvk = GroupVersionKind::gvk("networking.k8s.io", "v1alpha1", "GatewayClass");
         let ar = ApiResource::from_gvk(&gvk);
         Self { client, ar }
     }
 
-    /// List all GatewayClasses in the specified namespace.
+    /// Lista todos los GatewayClass disponibles en el clúster.
     pub async fn list_gateway_classes(&self) -> Result<Vec<DynamicObject>, GatewayClassError> {
         let gateway_classes: Api<DynamicObject> = Api::all_with(self.client.clone(), &self.ar);
         let lp = ListParams::default();
@@ -68,7 +65,7 @@ impl GatewayClassManager {
         Ok(gateway_class_list.items)
     }
 
-    /// Create a new GatewayClass resource.
+    /// Crea un nuevo GatewayClass en el clúster.
     pub async fn create_gateway_class(
         &self,
         gateway_class: &GatewayClassSpec,
@@ -78,17 +75,17 @@ impl GatewayClassManager {
 
         let name = gateway_class.spec.controller_name.clone();
 
-        // Create a new DynamicObject
+        // Crear un DynamicObject
         let mut crd = DynamicObject::new(&name, &self.ar);
         crd.data = serde_json::Value::Object(
-            serde_json::to_value(gateway_class)?.as_object().cloned().unwrap_or_default()
+            serde_json::to_value(gateway_class)?.as_object().cloned().unwrap_or_default(),
         );
 
         let created_gateway_class = gateway_classes.create(&pp, &crd).await?;
         Ok(created_gateway_class)
     }
 
-    /// Retrieve a GatewayClass by name.
+    /// Obtiene un GatewayClass específico por su nombre.
     pub async fn get_gateway_class(&self, name: &str) -> Result<Option<DynamicObject>, GatewayClassError> {
         let gateway_classes: Api<DynamicObject> = Api::all_with(self.client.clone(), &self.ar);
         match gateway_classes.get(name).await {
@@ -98,7 +95,7 @@ impl GatewayClassManager {
         }
     }
 
-    /// Delete a GatewayClass by name.
+    /// Elimina un GatewayClass por su nombre.
     pub async fn delete_gateway_class(&self, name: &str) -> Result<(), GatewayClassError> {
         let gateway_classes: Api<DynamicObject> = Api::all_with(self.client.clone(), &self.ar);
         gateway_classes.delete(name, &DeleteParams::default()).await?;
@@ -106,11 +103,11 @@ impl GatewayClassManager {
     }
 }
 
-/// Define the error type for `GatewayClass` operations.
+/// Definición de errores específicos para GatewayClass.
 #[derive(Error, Debug)]
 pub enum GatewayClassError {
-    #[error("Kubernetes API error: {0}")]
+    #[error("Error en la API de Kubernetes: {0}")]
     KubeError(#[from] kube::Error),
-    #[error("Serialization/Deserialization error: {0}")]
+    #[error("Error de serialización/deserialización: {0}")]
     SerdeError(#[from] serde_json::Error),
 }
