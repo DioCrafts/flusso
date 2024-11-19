@@ -13,7 +13,9 @@ import {
   DialogActions,
   TextField,
 } from '@mui/material';
-import { listBackends, addBackend, deleteBackend, healthCheck } from '../apiClient';
+import { backendsApi } from '../apiClient';
+
+const { listBackends, addBackend, deleteBackend, healthCheck } = backendsApi;
 
 const Backends: React.FC = () => {
   const [backends, setBackends] = useState<any[]>([]);

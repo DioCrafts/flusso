@@ -12,7 +12,9 @@ import {
   DialogActions,
   TextField,
 } from '@mui/material';
-import { listGateways, addGateway, deleteGateway, configureTLS } from '../apiClient';
+import { gatewaysApi } from '../apiClient';
+
+const { listGateways, addGateway, deleteGateway, configureTLS } = gatewaysApi;
 
 const Gateways: React.FC = () => {
   const [gateways, setGateways] = useState<any[]>([]);

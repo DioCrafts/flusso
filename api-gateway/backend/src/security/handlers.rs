@@ -1,5 +1,3 @@
-//! Handlers para la gestión de seguridad en el API Gateway.
-
 use actix_web::{web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 use std::sync::Mutex;
@@ -69,8 +67,9 @@ pub async fn add_policy(data: web::Data<AppState>, policy: web::Json<SecurityPol
 /// Eliminar una política de seguridad
 pub async fn delete_policy(data: web::Data<AppState>, id: web::Path<u32>) -> impl Responder {
     let mut policies = data.policies.lock().unwrap();
+    let id_value = *id; // Clona o copia el valor de `id`.
     let initial_len = policies.len();
-    policies.retain(|policy| policy.id != id.into_inner());
+    policies.retain(|policy| policy.id != id_value); // Usa la copia aquí.
     if policies.len() < initial_len {
         HttpResponse::Ok().finish()
     } else {
@@ -80,8 +79,7 @@ pub async fn delete_policy(data: web::Data<AppState>, id: web::Path<u32>) -> imp
 
 /// Validar un token JWT
 pub async fn validate_jwt(token: web::Path<String>) -> impl Responder {
-    // Simulación de validación de JWT
-    let valid = token == "valid_token";
+    let valid = token.as_str() == "valid_token"; // Usa `.as_str()` para obtener un `&str`.
     if valid {
         HttpResponse::Ok().json(JwtValidationResponse {
             valid: true,
@@ -115,4 +113,9 @@ pub async fn update_tls_config(tls_data: web::Json<(String, String)>) -> impl Re
         "certificate": cert,
         "key": key,
     }))
+}
+
+/// Endpoint protegido
+pub async fn protected_endpoint() -> impl Responder {
+    HttpResponse::Ok().body("This is a protected endpoint!")
 }

@@ -16,7 +16,9 @@ import {
   DialogActions,
   TextField,
 } from '@mui/material';
-import { getSecurityPolicies, addSecurityPolicy, deleteSecurityPolicy } from '../apiClient';
+import { securityApi } from '../apiClient';
+
+const { getPolicies: getSecurityPolicies, addPolicy: addSecurityPolicy, deletePolicy: deleteSecurityPolicy } = securityApi;
 
 interface Policy {
   name: string;

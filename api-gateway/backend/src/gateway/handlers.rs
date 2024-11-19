@@ -2,8 +2,8 @@ use actix_web::{web, HttpResponse, Responder};
 use serde_json::json;
 use kube::Client;
 
-use super::crd::gateway::GatewayManager; // Manager para Gateways
-use super::models::{Gateway, Route};    // Modelos compartidos
+use crate::gateway::crd::gateway::{GatewaySpec, GatewayInnerSpec, GatewayManager};
+use super::models::Gateway; // Modelo de Gateway compartido
 
 /// Listar todos los Gateways disponibles en Kubernetes.
 pub async fn list_gateways(client: web::Data<Client>) -> impl Responder {
@@ -22,7 +22,18 @@ pub async fn list_gateways(client: web::Data<Client>) -> impl Responder {
 pub async fn add_gateway(client: web::Data<Client>, gateway: web::Json<Gateway>) -> impl Responder {
     let manager = GatewayManager::new(client.get_ref().clone());
 
-    match manager.create_gateway("default", &gateway.into_inner()).await {
+    // Construir `GatewaySpec` basado en el modelo `Gateway`.
+    let gateway_spec = GatewaySpec {
+        spec: GatewayInnerSpec {
+            hostname: gateway.hostname.clone(),
+            tls_enabled: gateway.tls_enabled,
+            certificate: gateway.certificate.clone(),
+            routes: gateway.routes.iter().cloned().map(Into::into).collect(),
+        },
+    };
+    
+
+    match manager.create_gateway("default", &gateway_spec).await {
         Ok(_) => HttpResponse::Created().json(json!({ "message": "Gateway created successfully." })),
         Err(e) => {
             eprintln!("Error creating Gateway: {:?}", e);
@@ -72,4 +83,27 @@ pub async fn get_gateway_metrics(client: web::Data<Client>) -> impl Responder {
             HttpResponse::InternalServerError().body("Failed to fetch Gateway metrics.")
         }
     }
+}
+
+/// Inicia el servicio de Gateway API.
+/// Esto configura y ejecuta todos los endpoints relacionados con Gateways.
+pub async fn start_gateway_api(client: Client) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    println!("Starting Gateway API...");
+
+    // Configuración del servidor Actix-Web para manejar los endpoints.
+    actix_web::HttpServer::new(move || {
+        actix_web::App::new()
+            .app_data(web::Data::new(client.clone()))
+            .route("/gateways", web::get().to(list_gateways)) // Endpoint para listar Gateways
+            .route("/gateways", web::post().to(add_gateway))  // Endpoint para crear Gateway
+            .route("/gateways/{id}", web::delete().to(delete_gateway)) // Eliminar Gateway
+            .route("/gateways/tls", web::post().to(configure_tls)) // Configurar TLS
+            .route("/gateways/metrics", web::get().to(get_gateway_metrics)) // Obtener métricas
+    })
+    .bind(("0.0.0.0", 8082))? // Puerto para el Gateway API
+    .run()
+    .await?;
+
+    println!("Gateway API is running on port 8082.");
+    Ok(())
 }

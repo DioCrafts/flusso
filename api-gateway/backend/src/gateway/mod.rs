@@ -10,5 +10,6 @@ pub mod models; // Define las estructuras de datos compartidas
 pub mod crd; // Interacción con los CRDs en Kubernetes
 
 pub use handlers::*;
+pub use handlers::{start_gateway_api, list_gateways, add_gateway, delete_gateway, configure_tls, get_gateway_metrics};
 pub use models::*;
 pub use crd::*;

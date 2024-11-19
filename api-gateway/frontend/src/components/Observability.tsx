@@ -12,9 +12,10 @@ import {
   CardContent,
   LinearProgress,
 } from '@mui/material';
-import { getObservabilityMetrics, getObservabilityLogs } from '../apiClient';
+import { observabilityApi } from '../apiClient';
 
-// Interfaces
+const { getMetrics: getObservabilityMetrics, getLogs: getObservabilityLogs } = observabilityApi;
+
 interface Metric {
   name: string;
   value: number;

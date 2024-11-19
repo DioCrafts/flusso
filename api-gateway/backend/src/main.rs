@@ -43,8 +43,8 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
             Box::<dyn std::error::Error + Send + Sync>::from(e)
         }),
 
-        // Start Backends manager
-        start_backends_manager(client.clone()).map_err(|e| {
+        // Start Backends manager (no arguments required)
+        start_backends_manager().map_err(|e| {
             eprintln!("Error in start_backends_manager: {:?}", e);
             Box::<dyn std::error::Error + Send + Sync>::from(e)
         }),
@@ -55,14 +55,14 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
             Box::<dyn std::error::Error + Send + Sync>::from(e)
         }),
 
-        // Start Security service
-        start_security_service(client.clone()).map_err(|e| {
+        // Start Security service (no arguments required)
+        start_security_service().map_err(|e| {
             eprintln!("Error in start_security_service: {:?}", e);
             Box::<dyn std::error::Error + Send + Sync>::from(e)
         }),
 
-        // Start Plugins manager
-        start_plugins_manager(client.clone()).map_err(|e| {
+        // Start Plugins manager (no arguments required)
+        start_plugins_manager().map_err(|e| {
             eprintln!("Error in start_plugins_manager: {:?}", e);
             Box::<dyn std::error::Error + Send + Sync>::from(e)
         })

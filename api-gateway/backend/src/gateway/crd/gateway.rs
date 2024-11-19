@@ -105,11 +105,11 @@ impl GatewayManager {
         certificate: &str,
     ) -> Result<(), GatewayError> {
         let gateways: Api<DynamicObject> = Api::namespaced_with(self.client.clone(), namespace, &self.ar);
-
+    
         // Obtener el Gateway existente.
         let mut existing_gateway = gateways.get(name).await?;
-        let mut data = existing_gateway.data;
-
+        let mut data = existing_gateway.data.clone(); // Clonar el campo data
+    
         // Actualizar el certificado y habilitar TLS.
         if let Some(spec) = data.get_mut("spec") {
             if let Some(spec_obj) = spec.as_object_mut() {
@@ -117,12 +117,13 @@ impl GatewayManager {
                 spec_obj.insert("certificate".to_string(), serde_json::Value::String(certificate.to_string()));
             }
         }
-
-        // Actualizar el Gateway.
+    
+        // Reemplazar el Gateway con los cambios actualizados.
+        existing_gateway.data = data; // Actualizar el campo data después de la edición
         gateways.replace(name, &PostParams::default(), &existing_gateway).await?;
         Ok(())
     }
-
+    
     /// Obtener métricas simuladas de los Gateways.
     pub async fn get_metrics(&self) -> Result<Vec<(String, String, u64)>, GatewayError> {
         // Ejemplo de métricas simuladas.
@@ -140,4 +141,15 @@ pub enum GatewayError {
     KubeError(#[from] kube::Error),
     #[error("Error de serialización/deserialización: {0}")]
     SerdeError(#[from] serde_json::Error),
+}
+
+/// Implementación de conversión de `models::Route` a `gateway::crd::gateway::Route`.
+impl From<crate::gateway::models::Route> for Route {
+    fn from(route: crate::gateway::models::Route) -> Self {
+        Route {
+            path: route.path.unwrap_or_default(),
+            backend: route.backend,
+            methods: route.methods,
+        }
+    }
 }
