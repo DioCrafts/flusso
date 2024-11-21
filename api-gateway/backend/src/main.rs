@@ -38,7 +38,7 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
         }),
 
         // Start REST API server
-        start_rest_server(rest_port).map_err(|e| {
+        start_rest_server(rest_port, client.clone()).map_err(|e| {
             eprintln!("Error in start_rest_server: {:?}", e);
             Box::<dyn std::error::Error + Send + Sync>::from(e)
         }),

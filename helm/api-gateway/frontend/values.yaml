@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: diocrafts/flusso-api-gateway-gui
-  tag: v0.0.64
+  tag: v0.0.70
   pullPolicy: IfNotPresent
 
 service:

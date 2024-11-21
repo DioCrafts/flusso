@@ -1,37 +1,41 @@
-//! REST API Module for Flusso
-//!
-//! This module handles all REST endpoints for the backend, exposing data
-//! for the frontend and other clients.
-
-use actix_cors::Cors;
 use actix_web::{App, HttpServer};
-use crate::rest::routes::configure_routes;
+use actix_web::web::{Data, ServiceConfig};
+use std::sync::Mutex;
+use kube::Client; // Importa el cliente de Kubernetes
 
-/// Starts the REST API server.
-///
-/// # Arguments
-/// - `port`: Port number for the REST server.
-///
-/// # Returns
-/// A `Result` indicating whether the server started successfully.
-pub async fn start_rest_server(port: u16) -> std::io::Result<()> {
+pub mod routes; // Declarar submódulo de rutas
+pub mod handlers; // Declarar submódulo de handlers
+
+use crate::rest::routes::configure_routes;
+use crate::backends::handlers::AppState as BackendsState;
+use crate::security::handlers::AppState as SecurityState;
+use crate::observability::handlers::ObservabilityState;
+
+pub async fn start_rest_server(port: u16, client: Client) -> std::io::Result<()> {
     println!("Starting REST server on port {}", port);
 
-    HttpServer::new(move || {
-        // Configura el middleware CORS dentro del closure
-        let cors = Cors::default()
-            .allow_any_origin() // Permite cualquier origen; cambia esto en producción
-            .allow_any_header()
-            .allow_any_method();
+    let backends_state = Data::new(BackendsState {
+        backends: Mutex::new(vec![]),
+    });
 
+    let security_state = Data::new(SecurityState {
+        policies: Mutex::new(vec![]),
+    });
+
+    let observability_state = Data::new(ObservabilityState::new()); // Usa el método new()
+
+    // Si necesitas usar el cliente `client` en el futuro, puedes incluirlo aquí.
+
+    HttpServer::new(move || {
         App::new()
-            .wrap(cors) // Aplica CORS al App
-            .configure(configure_routes) // Registra las rutas
+            .app_data(backends_state.clone())
+            .app_data(security_state.clone())
+            .app_data(observability_state.clone())
+            // Puedes registrar el cliente como parte del estado compartido si es necesario.
+            .app_data(Data::new(client.clone()))
+            .configure(|cfg: &mut ServiceConfig| configure_routes(cfg))
     })
     .bind(("0.0.0.0", port))?
     .run()
     .await
 }
-
-pub mod handlers;
-pub mod routes;
