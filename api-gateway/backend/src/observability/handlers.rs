@@ -1,3 +1,5 @@
+// src/observability/handlers.rs
+//
 //! Handlers para la observabilidad en el API Gateway.
 //!
 //! Este módulo gestiona métricas, logs y la integración con sistemas de monitoreo como Prometheus.
@@ -29,6 +31,7 @@ pub struct LogEntry {
 pub struct ObservabilityState {
     pub metrics: Mutex<Vec<Metric>>,
     pub logs: Mutex<Vec<LogEntry>>,
+    pub alerts: Mutex<Vec<String>>, // Aquí añadimos el campo de alertas
 }
 
 impl ObservabilityState {
@@ -56,6 +59,10 @@ impl ObservabilityState {
                     latency_ms: 100,
                 },
             ]),
+            alerts: Mutex::new(vec![
+                "High CPU usage detected".to_string(),
+                "Memory consumption exceeded threshold".to_string(),
+            ]), // Añadir alertas simuladas
         }
     }
 }
