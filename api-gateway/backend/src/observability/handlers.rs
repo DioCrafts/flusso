@@ -110,3 +110,9 @@ pub async fn add_log(data: web::Data<ObservabilityState>, log_entry: web::Json<L
     logs.push(log_entry.into_inner());
     HttpResponse::Created().finish()
 }
+
+/// Obtener alertas
+pub async fn get_observability_alerts(data: web::Data<ObservabilityState>) -> impl Responder {
+    let alerts = data.alerts.lock().unwrap(); // Acceso a las alertas desde el estado compartido
+    HttpResponse::Ok().json(&*alerts)
+}

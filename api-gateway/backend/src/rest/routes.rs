@@ -3,7 +3,7 @@
 use actix_web::web;
 use crate::rest::handlers::{get_backends, add_backend, delete_backend};
 use crate::gateway::handlers::{list_gateways, add_gateway, delete_gateway, configure_tls, get_gateway_metrics};
-use crate::observability::handlers::{get_metrics, get_logs, export_prometheus_metrics}; // Importa handlers correctos
+use crate::observability::handlers::{get_metrics, get_logs, get_observability_alerts, export_prometheus_metrics}; // Asegúrate de incluir `get_observability_alerts`
 use crate::security::handlers::{list_policies, add_policy, delete_policy, protected_endpoint};
 
 pub fn configure_routes(cfg: &mut web::ServiceConfig) {
@@ -12,6 +12,8 @@ pub fn configure_routes(cfg: &mut web::ServiceConfig) {
             .route("/metrics", web::get().to(get_metrics)) // GET /api/metrics
             .route("/logs", web::get().to(get_logs))       // GET /api/logs
             .route("/metrics/export", web::get().to(export_prometheus_metrics)) // GET /api/metrics/export
+            .route("/observability/alerts", web::get().to(get_observability_alerts)) // GET /api/observability/alerts
+            .route("/observability/metrics", web::get().to(get_metrics)) // GET /api/observability/metrics
 
             // Backends
             .route("/backends", web::get().to(get_backends)) // GET /api/backends
@@ -32,4 +34,3 @@ pub fn configure_routes(cfg: &mut web::ServiceConfig) {
             .route("/security/protected", web::get().to(protected_endpoint)), // GET /api/security/protected
     );
 }
-
