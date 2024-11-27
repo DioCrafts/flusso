@@ -4,7 +4,7 @@
 <p align="center">Help us grow and star us on Github! ⭐️</p>
 
 <div align="center">
-  <img src="images/flusso-logo.svg" alt="Flusso Logo" width="200">
+  <img src="images/flusso-logo.svg" alt="Flusso Logo" width="250">
 </div>
 
 # 🚀 Flusso - Secure, High-Performance Kubernetes Ingress Controller and API Gateway in Rust 🦀🔒
