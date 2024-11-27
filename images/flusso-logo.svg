@@ -1,0 +1,12 @@
+<svg viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Círculo exterior -->
+  <circle cx="50" cy="50" r="40" fill="none" stroke="#8884FF" stroke-width="2"/>
+  
+  <!-- Línea fluida -->
+  <path d="M 20 50 C 30 20, 70 80, 80 50" stroke="#8884FF" stroke-width="3" fill="none"/>
+  
+  <!-- Texto "Flusso" -->
+  <text x="110" y="65" font-family="Arial" font-size="48" font-weight="bold" fill="#333333">
+    Flusso
+  </text>
+</svg>

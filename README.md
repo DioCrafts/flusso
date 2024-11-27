@@ -1,19 +1,29 @@
 
+<div id="top"></div>
+
+<p align="center">Help us grow and star us on Github! ⭐️</p>
+
+<div align="center">
+  <img src="images/flusso-logo.svg" alt="Flusso Logo" width="200">
+</div>
+
 # 🚀 Flusso - Secure, High-Performance Kubernetes Ingress Controller and API Gateway in Rust 🦀🔒
 
 **Flusso** is a secure, high-performance solution for Kubernetes, combining the functionalities of an **Ingress Controller** and an **API Gateway**. Written in **Rust**, Flusso is designed to meet the needs of modern cloud-native environments, offering a lightweight and efficient alternative to traditional solutions.
 
+
 <div align="center">
   
-  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-  [![Docker Pulls](https://img.shields.io/docker/pulls/diocrafts/flusso-ingress-controller)](https://hub.docker.com/r/diocrafts/flusso-ingress-controller)
-  [![Latest Release](https://img.shields.io/github/release/diocrafts/flusso.svg)](https://github.com/diocrafts/flusso/releases)
-  [![GitHub Stars](https://img.shields.io/github/stars/diocrafts/flusso?style=social)](https://github.com/diocrafts/flusso/stargazers)
-  [![GitHub Issues](https://img.shields.io/github/issues/diocrafts/flusso)](https://github.com/diocrafts/flusso/issues)
-  [![GitHub Forks](https://img.shields.io/github/forks/diocrafts/flusso?style=social)](https://github.com/diocrafts/flusso/network/members)
-  [![Last Commit](https://img.shields.io/github/last-commit/diocrafts/flusso)](https://github.com/diocrafts/flusso/commits/main)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+  [![Docker Pulls](https://img.shields.io/docker/pulls/diocrafts/flusso-ingress-controller?style=for-the-badge&logo=docker)](https://hub.docker.com/r/diocrafts/flusso-ingress-controller)
+  [![Latest Release](https://img.shields.io/github/release/diocrafts/flusso.svg?style=for-the-badge)](https://github.com/diocrafts/flusso/releases)
+  [![GitHub Stars](https://img.shields.io/github/stars/diocrafts/flusso?style=for-the-badge&logo=github)](https://github.com/diocrafts/flusso/stargazers)
+  [![GitHub Issues](https://img.shields.io/github/issues/diocrafts/flusso?style=for-the-badge)](https://github.com/diocrafts/flusso/issues)
+  [![GitHub Forks](https://img.shields.io/github/forks/diocrafts/flusso?style=for-the-badge&logo=github)](https://github.com/diocrafts/flusso/network/members)
+  [![Last Commit](https://img.shields.io/github/last-commit/diocrafts/flusso?style=for-the-badge)](https://github.com/diocrafts/flusso/commits/main)
 
 </div>
+
 
 ## Table of Contents
 

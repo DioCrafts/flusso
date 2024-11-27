@@ -1,3 +1,4 @@
+// frontend/src/apiClient.ts
 import axios from 'axios';
 
 // Crear una instancia base de axios
