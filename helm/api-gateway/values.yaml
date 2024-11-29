@@ -1,0 +1,52 @@
+# values.yaml
+global:
+  environment: production
+  
+frontend:
+  name: frontend
+  replicaCount: 1
+  image:
+    repository: diocrafts/flusso-api-gateway-gui
+    tag: v0.0.82
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+  env:
+    VITE_API_URL: "http://api-gateway-backend:3000"  # URL interna de del backend
+  ingress:
+    enabled: true
+    className: nginx
+    hosts:
+      - host: api-gateway.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+
+backend:
+  name: backend
+  replicaCount: 1
+  image:
+    repository: diocrafts/flusso-api-gateway
+    tag: v0.0.83
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 3000
+  ingress:
+    enabled: true
+    className: nginx
+    hosts:
+      - host: api.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+  auth:
+    jwtSecret: "your-secret-key-change-in-production"

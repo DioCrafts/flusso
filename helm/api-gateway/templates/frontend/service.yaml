@@ -1,0 +1,18 @@
+# templates/frontend/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-frontend
+  labels:
+    {{- include "api-gateway.labels" . | nindent 4 }}
+    component: frontend
+spec:
+  type: {{ .Values.frontend.service.type }}
+  ports:
+    - port: {{ .Values.frontend.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "api-gateway.labels" . | nindent 4 }}
+    component: frontend
