@@ -1,0 +1,48 @@
+[package]
+name = "api-gateway"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Web framework
+actix-web = "4.9.0"
+actix-cors = "0.7.0"
+
+# Async runtime
+tokio = { version = "1.41.1", features = ["full"] }
+futures = "0.3.31"
+
+# Serialización/Deserialización
+serde = { version = "1.0.215", features = ["derive"] }
+serde_json = "1.0.133"
+reqwest = { version = "0.12.9", features = ["stream", "json", "rustls-tls"] }
+http = "1.1.0"
+
+# Kubernetes integration
+kube = { version = "0.97.0", features = ["runtime", "derive"] }
+k8s-openapi = { version = "0.23.0", features = ["v1_27"] }
+
+# Configuración
+config = "0.14.1"
+dotenv = "0.15"
+num_cpus = "1.16.0"
+
+# Logging y métricas
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+prometheus = "0.13.4"
+
+# JWT y autenticación
+jsonwebtoken = "9.3.0"
+
+# Base de datos (si decides usar una)
+sqlx = { version = "0.8.2", features = ["runtime-tokio-rustls", "postgres"] }
+
+# Utilidades
+anyhow = "1.0.93"
+thiserror = "2.0.3"
+uuid = { version = "1.11.0", features = ["v4", "serde"] }
+chrono = { version = "0.4.38", features = ["serde"] }
+rand = "0.8.5"
+lazy_static = "1.5.0"
+awc = "3.5.1"
