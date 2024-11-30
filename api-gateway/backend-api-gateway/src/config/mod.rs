@@ -3,7 +3,7 @@ mod routes;
 mod settings;
 
 pub use routes::{Route, RouteConfig};
-pub use settings::{Settings, ServerSettings, DatabaseSettings, JwtSettings};
+pub use settings::{Settings, ServerSettings, JwtSettings, CorsSettings, MetricsSettings};
 
 use anyhow::Result;
 

@@ -7,7 +7,7 @@ frontend:
   replicaCount: 1
   image:
     repository: diocrafts/flusso-api-gateway-gui
-    tag: v0.0.82
+    tag: v0.0.85
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
@@ -28,7 +28,7 @@ backend:
   replicaCount: 1
   image:
     repository: diocrafts/flusso-api-gateway
-    tag: v0.0.83
+    tag: v0.0.92
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP

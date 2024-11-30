@@ -19,8 +19,9 @@ reqwest = { version = "0.12.9", features = ["stream", "json", "rustls-tls"] }
 http = "1.1.0"
 
 # Kubernetes integration
-kube = { version = "0.97.0", features = ["runtime", "derive"] }
-k8s-openapi = { version = "0.23.0", features = ["v1_27"] }
+kube = { version = "0.87.1", features = ["runtime", "derive"] }
+k8s-openapi = { version = "0.20.0", features = ["v1_26"] }
+schemars = "0.8.12"
 
 # Configuración
 config = "0.14.1"
@@ -35,7 +36,7 @@ prometheus = "0.13.4"
 # JWT y autenticación
 jsonwebtoken = "9.3.0"
 
-# Base de datos (si decides usar una)
+# Base de datos
 sqlx = { version = "0.8.2", features = ["runtime-tokio-rustls", "postgres"] }
 
 # Utilidades
@@ -45,4 +46,3 @@ uuid = { version = "1.11.0", features = ["v4", "serde"] }
 chrono = { version = "0.4.38", features = ["serde"] }
 rand = "0.8.5"
 lazy_static = "1.5.0"
-awc = "3.5.1"

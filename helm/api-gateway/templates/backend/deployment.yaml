@@ -1,4 +1,3 @@
-# templates/backend/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -26,12 +25,43 @@ spec:
           ports:
             - name: http
               containerPort: {{ .Values.backend.service.port }}
+          env:
+            - name: RUST_LOG
+              value: "info"
+            - name: RUST_BACKTRACE
+              value: "1"
+            - name: APP_SERVER_HOST
+              value: "0.0.0.0"
+            - name: APP_SERVER_PORT
+              value: "3000"
+            - name: APP_SERVER_WORKERS
+              value: "4"
+            - name: APP_SERVER_TIMEOUT
+              value: "30"
+            - name: APP_DATABASE_URL
+              value: "postgres://postgres:postgres@localhost/api_gateway"
+            - name: APP_DATABASE_MAX_CONNECTIONS
+              value: "5"
+            - name: APP_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-backend-secrets
+                  key: jwt-secret
+            - name: APP_JWT_EXPIRATION
+              value: "3600"
+            - name: APP_JWT_REFRESH_EXPIRATION
+              value: "86400"
+            - name: APP_CORS_ALLOWED_ORIGINS
+              value: "http://localhost:5173,https://api-gateway.example.com"
+            - name: APP_CORS_ALLOWED_METHODS
+              value: "GET,POST,PUT,DELETE"
+            - name: APP_CORS_ALLOWED_HEADERS
+              value: "Content-Type,Authorization"
+            - name: APP_CORS_MAX_AGE
+              value: "3600"
+            - name: APP_METRICS_ENABLED
+              value: "true"
+            - name: APP_METRICS_PATH
+              value: "/metrics"
           resources:
             {{- toYaml .Values.backend.resources | nindent 12 }}
-          volumeMounts:
-            - name: config
-              mountPath: /app/config
-      volumes:
-        - name: config
-          configMap:
-            name: {{ .Release.Name }}-backend-config

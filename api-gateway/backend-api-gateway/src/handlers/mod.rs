@@ -1,5 +1,8 @@
+// src/handlers/mod.rs
 pub mod auth;
 pub mod proxy;
+pub mod metrics;
+
 
 use actix_web::error::Error;
 use actix_web::{get, HttpResponse};

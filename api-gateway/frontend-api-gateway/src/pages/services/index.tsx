@@ -1,5 +1,5 @@
 // src/pages/services/index.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Card, 
   CardContent, 
@@ -7,59 +7,34 @@ import {
   CardTitle 
 } from '@/components/ui/card';
 import { CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
-
-// Datos simulados
-const MOCK_SERVICES = [
-  {
-    id: '1',
-    name: 'User Service',
-    status: 'healthy',
-    endpoint: '/api/users',
-    latency: 45,
-    uptime: '99.9%',
-    requestsPerMinute: 150,
-    errorRate: '0.01%',
-    lastChecked: new Date().toISOString()
-  },
-  {
-    id: '2',
-    name: 'Authentication Service',
-    status: 'warning',
-    endpoint: '/api/auth',
-    latency: 120,
-    uptime: '98.5%',
-    requestsPerMinute: 200,
-    errorRate: '1.5%',
-    lastChecked: new Date().toISOString()
-  },
-  {
-    id: '3',
-    name: 'Payment Service',
-    status: 'healthy',
-    endpoint: '/api/payments',
-    latency: 65,
-    uptime: '99.7%',
-    requestsPerMinute: 80,
-    errorRate: '0.05%',
-    lastChecked: new Date().toISOString()
-  },
-  {
-    id: '4',
-    name: 'Order Service',
-    status: 'error',
-    endpoint: '/api/orders',
-    latency: 350,
-    uptime: '95.0%',
-    requestsPerMinute: 50,
-    errorRate: '5.0%',
-    lastChecked: new Date().toISOString()
-  }
-];
+import { servicesApi, Service } from '@/services/api/services-api';
 
 export function ServicesPage() {
-  const [services] = useState(MOCK_SERVICES);
+  const [services, setServices] = useState<Service[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const getStatusIcon = (status: string) => {
+  useEffect(() => {
+    fetchServices();
+    const interval = setInterval(fetchServices, 30000); // Actualizar cada 30s
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchServices = async () => {
+    try {
+      setIsLoading(true);
+      const response = await servicesApi.getAllServices();
+      setServices(response.data);
+      setError(null);
+    } catch (err) {
+      setError('Error loading services');
+      console.error('Error fetching services:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getStatusIcon = (status: Service['status']) => {
     switch (status) {
       case 'healthy':
         return <CheckCircle className="h-5 w-5 text-green-500" />;
@@ -67,12 +42,10 @@ export function ServicesPage() {
         return <AlertTriangle className="h-5 w-5 text-yellow-500" />;
       case 'error':
         return <XCircle className="h-5 w-5 text-red-500" />;
-      default:
-        return null;
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: Service['status']) => {
     switch (status) {
       case 'healthy':
         return 'text-green-500';
@@ -80,10 +53,26 @@ export function ServicesPage() {
         return 'text-yellow-500';
       case 'error':
         return 'text-red-500';
-      default:
-        return '';
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -125,6 +114,10 @@ export function ServicesPage() {
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Error Rate</span>
                   <span>{service.errorRate}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Last Check</span>
+                  <span>{new Date(service.lastChecked).toLocaleTimeString()}</span>
                 </div>
               </div>
             </CardContent>
