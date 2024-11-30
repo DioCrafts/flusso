@@ -1,5 +1,6 @@
 // src/models/mod.rs
 pub mod route;
+pub mod kubernetes;  // Añade esta línea
 
 use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};

@@ -1,14 +1,40 @@
 // src/types/routes.ts
-export interface Route {
-  id: string;
+export interface GatewayRoute {
+  apiVersion: 'gateway.api.k8s.io/v1alpha1';
+  kind: 'GatewayRoute';
+  metadata: K8sMetadata;
+  spec: RouteSpec;
+  status?: RouteStatus;
+}
+
+export interface K8sMetadata {
+  name: string;
+  namespace?: string;
+  creationTimestamp?: string;
+  labels?: Record<string, string>;
+  annotations?: Record<string, string>;
+  generation?: number;
+}
+
+export interface RouteSpec {
   path: string;
-  targetService: string;
+  targetService: {
+    name: string;
+    namespace?: string;
+    port?: number;
+  };
   method: HttpMethod;
-  authRequired: boolean;
-  rateLimit?: RateLimitConfig;
-  timeout?: number;
-  retryPolicy?: RetryPolicy;
-  metadata: RouteMetadata;
+  rules: {
+    auth?: AuthConfig;
+    rateLimit?: RateLimitConfig;
+    timeout?: number;
+    retry?: RetryPolicy;
+  };
+}
+
+export interface AuthConfig {
+  required: boolean;
+  scopes?: string[];
 }
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
@@ -25,18 +51,24 @@ export interface RetryPolicy {
   enabled: boolean;
 }
 
-export interface RouteMetadata {
-  createdAt: string;
-  updatedAt: string;
-  version: number;
-  tags: string[];
+export interface RouteStatus {
+  observedGeneration?: number;
+  conditions: RouteCondition[];
+  metrics?: RouteMetrics;
 }
 
-export interface RouteStats {
+export interface RouteCondition {
+  type: 'Ready' | 'Valid' | 'Accepted';
+  status: 'True' | 'False' | 'Unknown';
+  lastTransitionTime: string;
+  reason: string;
+  message: string;
+}
+
+export interface RouteMetrics {
   requestCount: number;
   errorCount: number;
   averageLatency: number;
   p95Latency: number;
   lastUpdated: string;
 }
-

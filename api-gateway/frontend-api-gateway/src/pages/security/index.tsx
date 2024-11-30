@@ -1,5 +1,5 @@
 // src/pages/security/index.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -15,25 +15,46 @@ import {
   TabsList,
   TabsTrigger
 } from '@/components/ui/tabs';
+import { securityApi, SecuritySettings } from '@/services/api/security-api';
 
 export function SecurityPage() {
-  const [settings, setSettings] = React.useState({
+  const [settings, setSettings] = useState<SecuritySettings>({
     rateLimit: {
-      enabled: true,
-      requestsPerMinute: 100,
-      burstSize: 50
+      enabled: false,
+      requestsPerMinute: 0,
+      burstSize: 0
     },
     authentication: {
       jwtSecret: '',
-      tokenExpiration: 3600,
-      refreshTokenEnabled: true
+      tokenExpiration: 0,
+      refreshTokenEnabled: false
     },
     cors: {
-      enabled: true,
-      allowedOrigins: '*',
-      allowedMethods: ['GET', 'POST', 'PUT', 'DELETE']
+      enabled: false,
+      allowedOrigins: '',
+      allowedMethods: []
     }
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    try {
+      setIsLoading(true);
+      const response = await securityApi.getSettings();
+      setSettings(response.data);
+      setError(null);
+    } catch (err) {
+      setError('Error loading settings');
+      console.error('Error loading settings:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSettingChange = (section: string, key: string, value: any) => {
     setSettings(prev => ({
@@ -45,186 +66,56 @@ export function SecurityPage() {
     }));
   };
 
-  const handleSave = () => {
-    // Aquí iría la lógica para guardar la configuración
-    console.log('Saving settings:', settings);
+  const handleSave = async () => {
+    try {
+      setIsLoading(true);
+      await securityApi.updateSettings(settings);
+      setError(null);
+      await loadSettings();
+    } catch (err) {
+      setError('Error saving settings');
+      console.error('Error saving settings:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Security Settings</h1>
 
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+          {error}
+        </div>
+      )}
+
+      {/* Mantén el resto de tu JSX igual */}
       <Tabs defaultValue="rate-limiting">
-        <TabsList>
-          <TabsTrigger value="rate-limiting">Rate Limiting</TabsTrigger>
-          <TabsTrigger value="authentication">Authentication</TabsTrigger>
-          <TabsTrigger value="cors">CORS</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="rate-limiting">
-          <Card>
-            <CardHeader>
-              <CardTitle>Rate Limiting Configuration</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="font-medium">Enable Rate Limiting</span>
-                <Switch
-                  checked={settings.rateLimit.enabled}
-                  onCheckedChange={(checked) =>
-                    handleSettingChange('rateLimit', 'enabled', checked)
-                  }
-                />
-              </div>
-
-              {settings.rateLimit.enabled && (
-                <>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">
-                      Requests per Minute
-                    </label>
-                    <Input
-                      type="number"
-                      value={settings.rateLimit.requestsPerMinute}
-                      onChange={(e) =>
-                        handleSettingChange('rateLimit', 'requestsPerMinute',
-                          parseInt(e.target.value)
-                        )
-                      }
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">
-                      Burst Size
-                    </label>
-                    <Input
-                      type="number"
-                      value={settings.rateLimit.burstSize}
-                      onChange={(e) =>
-                        handleSettingChange('rateLimit', 'burstSize',
-                          parseInt(e.target.value)
-                        )
-                      }
-                    />
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="authentication">
-          <Card>
-            <CardHeader>
-              <CardTitle>Authentication Settings</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">JWT Secret</label>
-                <Input
-                  type="password"
-                  value={settings.authentication.jwtSecret}
-                  onChange={(e) =>
-                    handleSettingChange('authentication', 'jwtSecret',
-                      e.target.value
-                    )
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  Token Expiration (seconds)
-                </label>
-                <Input
-                  type="number"
-                  value={settings.authentication.tokenExpiration}
-                  onChange={(e) =>
-                    handleSettingChange('authentication', 'tokenExpiration',
-                      parseInt(e.target.value)
-                    )
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span className="font-medium">Enable Refresh Tokens</span>
-                <Switch
-                  checked={settings.authentication.refreshTokenEnabled}
-                  onCheckedChange={(checked) =>
-                    handleSettingChange('authentication', 'refreshTokenEnabled', checked)
-                  }
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="cors">
-          <Card>
-            <CardHeader>
-              <CardTitle>CORS Configuration</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="font-medium">Enable CORS</span>
-                <Switch
-                  checked={settings.cors.enabled}
-                  onCheckedChange={(checked) =>
-                    handleSettingChange('cors', 'enabled', checked)
-                  }
-                />
-              </div>
-
-              {settings.cors.enabled && (
-                <>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">
-                      Allowed Origins
-                    </label>
-                    <Input
-                      value={settings.cors.allowedOrigins}
-                      onChange={(e) =>
-                        handleSettingChange('cors', 'allowedOrigins',
-                          e.target.value
-                        )
-                      }
-                      placeholder="* or specific origins"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">
-                      Allowed Methods
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {['GET', 'POST', 'PUT', 'DELETE'].map(method => (
-                        <Button
-                          key={method}
-                          variant={settings.cors.allowedMethods.includes(method) ? 'default' : 'outline'}
-                          onClick={() => {
-                            const methods = settings.cors.allowedMethods.includes(method)
-                              ? settings.cors.allowedMethods.filter(m => m !== method)
-                              : [...settings.cors.allowedMethods, method];
-                            handleSettingChange('cors', 'allowedMethods', methods);
-                          }}
-                        >
-                          {method}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+        {/* ... Tu código existente ... */}
       </Tabs>
 
-      <div className="flex justify-end">
-        <Button onClick={handleSave}>
-          Save Settings
+      <div className="flex justify-end space-x-4">
+        <Button 
+          variant="outline" 
+          onClick={loadSettings}
+          disabled={isLoading}
+        >
+          Reset
+        </Button>
+        <Button 
+          onClick={handleSave}
+          disabled={isLoading}
+        >
+          {isLoading ? 'Saving...' : 'Save Settings'}
         </Button>
       </div>
     </div>

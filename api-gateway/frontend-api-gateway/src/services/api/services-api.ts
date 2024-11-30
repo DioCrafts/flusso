@@ -1,18 +1,33 @@
 // src/services/api/services-api.ts
 import apiClient from './axios-config';
-import { Service } from '@/types/services';
 
 export const servicesApi = {
-  getAll: () => 
-    apiClient.get<Service[]>('/services'),
+  getAllServices: () => 
+    apiClient.get<Service[]>('/api/services'),
 
-  getStatus: (id: string) => 
-    apiClient.get<Service>(`/services/${id}/status`),
+  getServiceDetails: (name: string) =>
+    apiClient.get<ServiceDetails>(`/api/services/${name}`),
 
-  getMetrics: (id: string) => 
-    apiClient.get(`/services/${id}/metrics`),
-
-  updateConfig: (id: string, config: any) => 
-    apiClient.put(`/services/${id}/config`, config)
+  getServiceMetrics: (name: string) =>
+    apiClient.get<ServiceMetrics>(`/api/services/${name}/metrics`),
 };
 
+// Tipos
+export interface Service {
+  id: string;
+  name: string;
+  status: 'healthy' | 'warning' | 'error';
+  endpoint: string;
+  latency: number;
+  uptime: string;
+  requestsPerMinute: number;
+  errorRate: string;
+  lastChecked: string;
+}
+
+export interface ServiceMetrics {
+  latency: number;
+  requestsPerMinute: number;
+  errorRate: number;
+  uptime: number;
+}
