@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "api-gateway.name" . }}
+  labels:
+    {{- include "api-gateway.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "api-gateway.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "api-gateway.labels" . | nindent 8 }}
+    spec:
+      # 1) Referencia al ServiceAccount que creaste
+      serviceAccountName: {{ include "api-gateway.name" . }}-sa
+
+      containers:
+        - name: api-gateway
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+              name: http
+          env:
+            - name: JWT_SECRET
+              value: {{ .Values.env.JWT_SECRET | quote }}
+            - name: RUST_LOG
+              value: {{ .Values.env.RUST_LOG | quote }}
+            - name: RUST_BACKTRACE
+              value: {{ .Values.env.RUST_BACKTRACE | quote }}
+            # Agrega aquí cualquier otra variable de entorno
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
