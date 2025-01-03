@@ -1,7 +1,15 @@
+
+root@elnidodelaguila:/home/torrefacto/flusso/api-gateway# cat Dockerfile
 #################################################################
 # 1. Stage de compilación del FRONTEND
 #################################################################
-FROM node:18 AS frontend-builder
+FROM node:23.5.0 AS frontend-builder
+
+# Actualizar los paquetes del sistema
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Cambia el WORKDIR a algo descriptivo
 WORKDIR /frontend
@@ -22,13 +30,15 @@ RUN npm run build
 #################################################################
 # 2. Stage de compilación del BACKEND (Rust)
 #################################################################
-FROM rust:1.72 AS backend-builder
+FROM rust:1.83 AS backend-builder
 
 WORKDIR /backend
 
-# Instalar paquetes del sistema que Rust pudiera necesitar (ej. openssl)
+# Actualizar y actualizar paquetes del sistema e Instalar paquetes del sistema que Rust pudiera necesitar (ej. openssl)
 RUN apt-get update && \
+    apt-get upgrade -y && \
     apt-get install -y pkg-config libssl-dev && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Copiamos los archivos Cargo.toml y Cargo.lock
