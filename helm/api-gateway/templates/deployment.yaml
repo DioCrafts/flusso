@@ -1,36 +1,76 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "api-gateway.name" . }}
+  name: {{ .Release.Name }}-server
   labels:
     {{- include "api-gateway.labels" . | nindent 4 }}
+    component: server
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.server.replicaCount }}
   selector:
     matchLabels:
       {{- include "api-gateway.labels" . | nindent 6 }}
+      component: server
   template:
     metadata:
       labels:
         {{- include "api-gateway.labels" . | nindent 8 }}
+        component: server
     spec:
-      # 1) Referencia al ServiceAccount que creaste
-      serviceAccountName: {{ include "api-gateway.name" . }}-sa
-
+      serviceAccountName: {{ include "api-gateway.name" . }}-server-sa
       containers:
-        - name: api-gateway
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+        - name: {{ .Values.server.name }}
+          image: "{{ .Values.server.image.repository }}:{{ .Values.server.image.tag }}"
+          imagePullPolicy: {{ .Values.server.image.pullPolicy }}
           ports:
-            - containerPort: {{ .Values.service.port }}
-              name: http
+            - name: http
+              containerPort: {{ .Values.server.service.port }}
           env:
-            - name: JWT_SECRET
-              value: {{ .Values.env.JWT_SECRET | quote }}
+            # Variables comunes para backend y frontend
             - name: RUST_LOG
-              value: {{ .Values.env.RUST_LOG | quote }}
+              value: "info"
             - name: RUST_BACKTRACE
-              value: {{ .Values.env.RUST_BACKTRACE | quote }}
-            # Agrega aquí cualquier otra variable de entorno
+              value: "1"
+            - name: APP_SERVER_HOST
+              value: "0.0.0.0"
+            - name: APP_SERVER_PORT
+              value: "3000"
+            - name: APP_SERVER_WORKERS
+              value: "4"
+            - name: APP_SERVER_TIMEOUT
+              value: "30"
+            - name: APP_DATABASE_URL
+              value: "postgres://postgres:postgres@localhost/api_gateway"
+            - name: APP_DATABASE_MAX_CONNECTIONS
+              value: "5"
+            - name: APP_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-server-secrets
+                  key: jwt-secret
+            - name: APP_JWT_EXPIRATION
+              value: "3600"
+            - name: APP_JWT_REFRESH_EXPIRATION
+              value: "86400"
+            - name: APP_CORS_ALLOWED_ORIGINS
+              value: "http://localhost:5173,https://api-gateway.example.com"
+            - name: APP_CORS_ALLOWED_METHODS
+              value: "GET,POST,PUT,DELETE"
+            - name: APP_CORS_ALLOWED_HEADERS
+              value: "Content-Type,Authorization"
+            - name: APP_CORS_MAX_AGE
+              value: "3600"
+            - name: APP_METRICS_ENABLED
+              value: "true"
+            - name: APP_METRICS_PATH
+              value: "/metrics"
+            # Variable específica para el frontend
+            - name: VITE_API_URL
+              value: {{ .Values.server.env.VITE_API_URL | quote }}
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.server.resources | nindent 12 }}
+          securityContext:
+            capabilities:
+              add:
+                - NET_BIND_SERVICE
+

@@ -4,10 +4,10 @@
  * MIT Licensed
  */
 
-var chai = require('../../chai');
-var flag = require('./flag');
-var isProxyEnabled = require('./isProxyEnabled');
-var transferFlags = require('./transferFlags');
+import {Assertion} from '../assertion.js';
+import {flag} from './flag.js';
+import {isProxyEnabled} from './isProxyEnabled.js';
+import {transferFlags} from './transferFlags.js';
 
 /**
  * ### .overwriteProperty(ctx, name, fn)
@@ -16,16 +16,15 @@ var transferFlags = require('./transferFlags');
  * access to previous value. Must return function to use as getter.
  *
  *     utils.overwriteProperty(chai.Assertion.prototype, 'ok', function (_super) {
- *       return function () {
- *         var obj = utils.flag(this, 'object');
- *         if (obj instanceof Foo) {
- *           new chai.Assertion(obj.name).to.equal('bar');
- *         } else {
- *           _super.call(this);
+ *         return function () {
+ *             var obj = utils.flag(this, 'object');
+ *             if (obj instanceof Foo) {
+ *                 new chai.Assertion(obj.name).to.equal('bar');
+ *             } else {
+ *                 _super.call(this);
+ *             }
  *         }
- *       }
  *     });
- *
  *
  * Can also be accessed directly from `chai.Assertion`.
  *
@@ -35,15 +34,14 @@ var transferFlags = require('./transferFlags');
  *
  *     expect(myFoo).to.be.ok;
  *
- * @param {Object} ctx object whose property is to be overwritten
- * @param {String} name of property to overwrite
+ * @param {object} ctx object whose property is to be overwritten
+ * @param {string} name of property to overwrite
  * @param {Function} getter function that returns a getter function to be used for name
  * @namespace Utils
  * @name overwriteProperty
- * @api public
+ * @public
  */
-
-module.exports = function overwriteProperty(ctx, name, getter) {
+export function overwriteProperty(ctx, name, getter) {
   var _get = Object.getOwnPropertyDescriptor(ctx, name)
     , _super = function () {};
 
@@ -83,10 +81,10 @@ module.exports = function overwriteProperty(ctx, name, getter) {
           return result;
         }
 
-        var newAssertion = new chai.Assertion();
+        var newAssertion = new Assertion();
         transferFlags(this, newAssertion);
         return newAssertion;
       }
     , configurable: true
   });
-};
+}

@@ -10,6 +10,10 @@ export const servicesApi = {
 
   getServiceMetrics: (name: string) =>
     apiClient.get<ServiceMetrics>(`/api/services/${name}/metrics`),
+
+// Agregar esta función
+getAllServicesHealth: () =>
+  apiClient.get<ServiceHealth[]>('/api/services/health'),
 };
 
 // Tipos
@@ -30,4 +34,11 @@ export interface ServiceMetrics {
   requestsPerMinute: number;
   errorRate: number;
   uptime: number;
+}
+
+// Tipo para la respuesta de health
+export interface ServiceHealth {
+  name: string;
+  status: 'healthy' | 'warning' | 'error';
+  lastCheck: string;
 }

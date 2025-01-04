@@ -11,16 +11,16 @@
  *
  *     utils.isNaN(NaN); // true
  *
- * @param {Value} The value which has to be checked if it is NaN
+ * @param {unknown} value The value which has to be checked if it is NaN
+ * @returns {boolean}
  * @name isNaN
- * @api private
+ * @private
  */
-
-function isNaN(value) {
+function _isNaN(value) {
   // Refer http://www.ecma-international.org/ecma-262/6.0/#sec-isnan-number
   // section's NOTE.
   return value !== value;
 }
 
 // If ECMAScript 6's Number.isNaN is present, prefer that.
-module.exports = Number.isNaN || isNaN;
+export const isNaN = Number.isNaN || _isNaN;

@@ -4,6 +4,10 @@
  * MIT Licensed
  */
 
+import {AssertionError} from 'assertion-error';
+import {flag} from './flag.js';
+import {type} from './type-detect.js';
+
 /**
  * ### .expectTypes(obj, types)
  *
@@ -11,18 +15,13 @@
  *
  *     utils.expectTypes(this, ['array', 'object', 'string']);
  *
- * @param {Mixed} obj constructed Assertion
- * @param {Array} type A list of allowed types for this assertion
+ * @param {unknown} obj constructed Assertion
+ * @param {Array} types A list of allowed types for this assertion
  * @namespace Utils
  * @name expectTypes
- * @api public
+ * @public
  */
-
-var AssertionError = require('assertion-error');
-var flag = require('./flag');
-var type = require('type-detect');
-
-module.exports = function expectTypes(obj, types) {
+export function expectTypes(obj, types) {
   var flagMsg = flag(obj, 'message');
   var ssfi = flag(obj, 'ssfi');
 
@@ -48,4 +47,4 @@ module.exports = function expectTypes(obj, types) {
       ssfi
     );
   }
-};
+}

@@ -1,4 +1,4 @@
-var fnLengthDesc = Object.getOwnPropertyDescriptor(function () {}, 'length');
+const fnLengthDesc = Object.getOwnPropertyDescriptor(function () {}, 'length');
 
 /*!
  * Chai - addLengthGuard utility
@@ -34,13 +34,13 @@ var fnLengthDesc = Object.getOwnPropertyDescriptor(function () {}, 'length');
  * environments is the priority.
  *
  * @param {Function} fn
- * @param {String} assertionName
- * @param {Boolean} isChainable
+ * @param {string} assertionName
+ * @param {boolean} isChainable
+ * @returns {unknown}
  * @namespace Utils
  * @name addLengthGuard
  */
-
-module.exports = function addLengthGuard (fn, assertionName, isChainable) {
+export function addLengthGuard(fn, assertionName, isChainable) {
   if (!fnLengthDesc.configurable) return fn;
 
   Object.defineProperty(fn, 'length', {
@@ -57,4 +57,4 @@ module.exports = function addLengthGuard (fn, assertionName, isChainable) {
   });
 
   return fn;
-};
+}

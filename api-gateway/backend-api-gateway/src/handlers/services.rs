@@ -1,4 +1,3 @@
-// src/handlers/services.rs
 use actix_web::{get, web, HttpResponse, Result};
 use kube::{
     api::{Api, ListParams},
@@ -32,8 +31,14 @@ pub enum ServiceStatus {
 
 #[get("/api/services")]
 pub async fn get_services(client: web::Data<Client>) -> Result<HttpResponse> {
-    let services: Api<Service> = Api::all(client.as_ref());
-    let service_list = services.list(&ListParams::default()).await?;
+    // Clonamos el cliente para cumplir con la firma de `Api::all`
+    let services: Api<Service> = Api::all(client.get_ref().clone());
+    let service_list = services.list(&ListParams::default())
+        .await
+        .map_err(|e| {
+            log::error!("Error listing services: {:?}", e);
+            actix_web::error::ErrorInternalServerError(e)
+        })?;
 
     let mut service_info = Vec::new();
     for service in service_list {
@@ -57,9 +62,8 @@ pub async fn get_services(client: web::Data<Client>) -> Result<HttpResponse> {
     Ok(HttpResponse::Ok().json(service_info))
 }
 
-async fn get_service_metrics(service_name: &str) -> Result<ServiceMetrics> {
+async fn get_service_metrics(_service_name: &str) -> Result<ServiceMetrics> {
     // En una implementación real, esto obtendría métricas de Prometheus
-    // Por ahora, usamos métricas simuladas
     Ok(ServiceMetrics {
         latency: rand::random::<i32>() % 200 + 20,
         uptime: 99.9,

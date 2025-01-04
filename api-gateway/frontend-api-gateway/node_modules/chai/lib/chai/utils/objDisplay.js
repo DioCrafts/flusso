@@ -4,12 +4,8 @@
  * MIT Licensed
  */
 
-/*!
- * Module dependencies
- */
-
-var inspect = require('./inspect');
-var config = require('../config');
+import {inspect} from './inspect.js';
+import {config} from '../config.js';
 
 /**
  * ### .objDisplay(object)
@@ -18,14 +14,13 @@ var config = require('../config');
  * criteria to be inspected in-line for error
  * messages or should be truncated.
  *
- * @param {Mixed} javascript object to inspect
+ * @param {unknown} obj javascript object to inspect
  * @returns {string} stringified object
  * @name objDisplay
  * @namespace Utils
- * @api public
+ * @public
  */
-
-module.exports = function objDisplay(obj) {
+export function objDisplay(obj) {
   var str = inspect(obj)
     , type = Object.prototype.toString.call(obj);
 
@@ -48,4 +43,4 @@ module.exports = function objDisplay(obj) {
   } else {
     return str;
   }
-};
+}

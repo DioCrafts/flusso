@@ -1,90 +1,95 @@
+# ===== Etapa de construcción del Backend =====
+FROM rust:1.83.0 AS builder-backend
+WORKDIR /usr/src/app
 
-root@elnidodelaguila:/home/torrefacto/flusso/api-gateway# cat Dockerfile
-#################################################################
-# 1. Stage de compilación del FRONTEND
-#################################################################
-FROM node:23.5.0 AS frontend-builder
-
-# Actualizar los paquetes del sistema
+# Instalar dependencias necesarias
 RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Cambia el WORKDIR a algo descriptivo
-WORKDIR /frontend
-
-# Copiar manifiestos de npm
-COPY frontend-api-gateway/package*.json ./
-
-# Instalar dependencias
-RUN npm install
-
-# Copiar el resto del código del frontend
-COPY frontend-api-gateway/ ./
-
-# Compilar el frontend
-RUN npm run build
-# => genera la carpeta /frontend/dist (o /frontend/build, según tu config)
-
-#################################################################
-# 2. Stage de compilación del BACKEND (Rust)
-#################################################################
-FROM rust:1.83 AS backend-builder
-
-WORKDIR /backend
-
-# Actualizar y actualizar paquetes del sistema e Instalar paquetes del sistema que Rust pudiera necesitar (ej. openssl)
-RUN apt-get update && \
-    apt-get upgrade -y && \
     apt-get install -y pkg-config libssl-dev && \
-    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Copiamos los archivos Cargo.toml y Cargo.lock
-COPY backend-api-gateway/Cargo.toml .
-COPY backend-api-gateway/Cargo.lock .
-
-# Crear src vacía para precachear dependencias
+# Copiar archivos de manifiesto y construir dependencias
+COPY backend-api-gateway/Cargo.toml backend-api-gateway/Cargo.lock ./
 RUN mkdir src && echo "fn main() {}" > src/main.rs
 RUN cargo build --release
-# Esto compila las dependencias y las deja cacheadas
 
-# Borrar el dummy main.rs
+# Copiar el código fuente real y construir la aplicación
 RUN rm -f src/main.rs
-
-# Copiar el código real del backend
 COPY backend-api-gateway/src/ src/
-
-# Compilar el backend
 RUN cargo build --release
-# El binario resultante quedará en /backend/target/release/api-gateway (ajusta nombre si es distinto)
 
-#################################################################
-# 3. Imagen final (runtime)
-#################################################################
-FROM debian:stable-slim
-
-# Crear carpeta /app y usarla como directorio de trabajo
+# ===== Etapa de construcción del Frontend =====
+FROM node:23.5-alpine AS builder-frontend
 WORKDIR /app
 
-# Copiar el binario Rust
-COPY --from=backend-builder /backend/target/release/api-gateway /app/api-gateway
+# Definir argumentos de build
+ARG API_URL=http://localhost:3000
+ARG DEBUG_MODE=true
+ARG APP_VERSION=1.0.0
 
-# Copiar la carpeta build del frontend
-# (asumiendo que Vite genera /frontend/dist)
-COPY --from=frontend-builder /frontend/dist /app/build
-# O si tu build se llama `build` en vez de `dist`, ajusta la ruta:
-# COPY --from=frontend-builder /frontend/build /app/build
+# Establecer variables de entorno para Vite
+ENV VITE_API_URL=$API_URL
+ENV VITE_DEBUG_MODE=$DEBUG_MODE
+ENV VITE_APP_VERSION=$APP_VERSION
 
-# (Opcional) Crear usuario no root
+# Copiar y instalar dependencias
+COPY frontend-api-gateway/package*.json ./
+RUN npm install
+
+# Copiar el código fuente y construir la aplicación
+COPY frontend-api-gateway/. .
+RUN npm run build  # Eliminado '|| true' para detectar errores durante la construcción
+
+# ===== Etapa de Runtime =====
+FROM debian:bookworm-slim
+WORKDIR /app
+
+# Instalar dependencias de runtime, Nginx y curl
+RUN apt-get update && \
+    apt-get install -y ca-certificates libssl3 nginx curl && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copiar el binario del backend
+COPY --from=builder-backend /usr/src/app/target/release/api-gateway /app/api-gateway
+
+# Copiar los archivos del frontend a Nginx
+COPY --from=builder-frontend /app/dist /usr/share/nginx/html
+
+# Eliminar todas las configuraciones de Nginx en conf.d para evitar conflictos
+RUN rm -f /etc/nginx/conf.d/*.conf
+
+# Copiar el archivo nginx.conf desde frontend-api-gateway
+COPY frontend-api-gateway/nginx.conf /etc/nginx/conf.d/default.conf
+
+# **Eliminar todas las configuraciones en sites-enabled para evitar conflictos**
+RUN rm -f /etc/nginx/sites-enabled/*
+
+# Crear usuario no root para el backend
 RUN useradd -m -U -s /bin/false api-gateway && \
     chown -R api-gateway:api-gateway /app
+
+# Crear los directorios necesarios para Nginx y asignar permisos
+RUN mkdir -p /var/lib/nginx/body /var/lib/nginx/proxy /var/lib/nginx/fastcgi /var/log/nginx && \
+    chown -R api-gateway:api-gateway /var/lib/nginx /var/log/nginx
+
+# Asignar propiedad al directorio root de Nginx
+RUN chown -R api-gateway:api-gateway /usr/share/nginx/html
+
+# Eliminar la directiva 'user' en nginx.conf
+RUN sed -i '/^user /d' /etc/nginx/nginx.conf
+
+# Reemplazar la directiva 'pid' en el archivo principal de Nginx
+RUN sed -i 's|^pid .*;|pid /var/lib/nginx/nginx.pid;|' /etc/nginx/nginx.conf
+
+# Copiar script de inicio
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
+# Exponer puertos
+EXPOSE 80 3000
+
+# Definir usuario
 USER api-gateway
 
-# Exponer el puerto 3000 (donde corre Actix, por ejemplo)
-EXPOSE 3000
-
-# Arrancar el binario
-CMD ["./api-gateway"]
+# Comando de inicio
+CMD ["/start.sh"]
 

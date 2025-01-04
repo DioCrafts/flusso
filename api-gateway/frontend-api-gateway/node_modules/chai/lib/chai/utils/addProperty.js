@@ -4,10 +4,10 @@
  * MIT Licensed
  */
 
-var chai = require('../../chai');
-var flag = require('./flag');
-var isProxyEnabled = require('./isProxyEnabled');
-var transferFlags = require('./transferFlags');
+import {Assertion} from '../assertion.js';
+import {flag} from './flag.js';
+import {isProxyEnabled} from './isProxyEnabled.js';
+import {transferFlags} from './transferFlags.js';
 
 /**
  * ### .addProperty(ctx, name, getter)
@@ -15,8 +15,8 @@ var transferFlags = require('./transferFlags');
  * Adds a property to the prototype of an object.
  *
  *     utils.addProperty(chai.Assertion.prototype, 'foo', function () {
- *       var obj = utils.flag(this, 'object');
- *       new chai.Assertion(obj).to.be.instanceof(Foo);
+ *         var obj = utils.flag(this, 'object');
+ *         new chai.Assertion(obj).to.be.instanceof(Foo);
  *     });
  *
  * Can also be accessed directly from `chai.Assertion`.
@@ -27,15 +27,14 @@ var transferFlags = require('./transferFlags');
  *
  *     expect(myFoo).to.be.foo;
  *
- * @param {Object} ctx object to which the property is added
- * @param {String} name of property to add
+ * @param {object} ctx object to which the property is added
+ * @param {string} name of property to add
  * @param {Function} getter function to be used for name
  * @namespace Utils
  * @name addProperty
- * @api public
+ * @public
  */
-
-module.exports = function addProperty(ctx, name, getter) {
+export function addProperty(ctx, name, getter) {
   getter = getter === undefined ? function () {} : getter;
 
   Object.defineProperty(ctx, name,
@@ -63,10 +62,10 @@ module.exports = function addProperty(ctx, name, getter) {
         if (result !== undefined)
           return result;
 
-        var newAssertion = new chai.Assertion();
+        var newAssertion = new Assertion();
         transferFlags(this, newAssertion);
         return newAssertion;
       }
     , configurable: true
   });
-};
+}

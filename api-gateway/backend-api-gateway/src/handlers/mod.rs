@@ -2,6 +2,7 @@
 pub mod auth;
 pub mod proxy;
 pub mod metrics;
+pub mod services; // Agrega esta línea para incluir `services.rs`
 
 
 use actix_web::error::Error;
