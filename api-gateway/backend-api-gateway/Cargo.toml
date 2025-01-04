@@ -32,6 +32,7 @@ num_cpus = "1.16.0"
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 prometheus = "0.13.4"
+log = "0.4.22"
 
 # JWT y autenticación
 jsonwebtoken = "9.3.0"

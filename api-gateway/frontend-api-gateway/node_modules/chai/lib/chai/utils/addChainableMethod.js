@@ -4,17 +4,13 @@
  * MIT Licensed
  */
 
-/*!
- * Module dependencies
- */
+import {Assertion} from '../assertion.js';
+import {addLengthGuard} from './addLengthGuard.js';
+import {flag} from './flag.js';
+import {proxify} from './proxify.js';
+import {transferFlags} from './transferFlags.js';
 
-var addLengthGuard = require('./addLengthGuard');
-var chai = require('../../chai');
-var flag = require('./flag');
-var proxify = require('./proxify');
-var transferFlags = require('./transferFlags');
-
-/*!
+/**
  * Module variables
  */
 
@@ -47,8 +43,8 @@ var call  = Function.prototype.call,
  * Adds a method to an object, such that the method can also be chained.
  *
  *     utils.addChainableMethod(chai.Assertion.prototype, 'foo', function (str) {
- *       var obj = utils.flag(this, 'object');
- *       new chai.Assertion(obj).to.be.equal(str);
+ *         var obj = utils.flag(this, 'object');
+ *         new chai.Assertion(obj).to.be.equal(str);
  *     });
  *
  * Can also be accessed directly from `chai.Assertion`.
@@ -61,16 +57,15 @@ var call  = Function.prototype.call,
  *     expect(fooStr).to.be.foo('bar');
  *     expect(fooStr).to.be.foo.equal('foo');
  *
- * @param {Object} ctx object to which the method is added
- * @param {String} name of method to add
+ * @param {object} ctx object to which the method is added
+ * @param {string} name of method to add
  * @param {Function} method function to be used for `name`, when called
  * @param {Function} chainingBehavior function to be called every time the property is accessed
  * @namespace Utils
  * @name addChainableMethod
- * @api public
+ * @public
  */
-
-module.exports = function addChainableMethod(ctx, name, method, chainingBehavior) {
+export function addChainableMethod(ctx, name, method, chainingBehavior) {
   if (typeof chainingBehavior !== 'function') {
     chainingBehavior = function () { };
   }
@@ -115,7 +110,7 @@ module.exports = function addChainableMethod(ctx, name, method, chainingBehavior
             return result;
           }
 
-          var newAssertion = new chai.Assertion();
+          var newAssertion = new Assertion();
           transferFlags(this, newAssertion);
           return newAssertion;
         };
@@ -149,4 +144,4 @@ module.exports = function addChainableMethod(ctx, name, method, chainingBehavior
       }
     , configurable: true
   });
-};
+}

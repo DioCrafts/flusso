@@ -39,6 +39,7 @@ Common labels
 helm.sh/chart: {{ include "api-gateway.chart" . }}
 {{ include "api-gateway.selectorLabels" . }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+component: server
 {{- end }}
 
 {{/*
@@ -47,6 +48,7 @@ Selector labels
 {{- define "api-gateway.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "api-gateway.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+component: server
 {{- end }}
 
 {{/*
@@ -59,3 +61,4 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+

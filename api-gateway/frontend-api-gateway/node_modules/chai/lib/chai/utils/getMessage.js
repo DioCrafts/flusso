@@ -4,13 +4,9 @@
  * MIT Licensed
  */
 
-/*!
- * Module dependencies
- */
-
-var flag = require('./flag')
-  , getActual = require('./getActual')
-  , objDisplay = require('./objDisplay');
+import {flag} from './flag.js';
+import {getActual} from './getActual.js';
+import {objDisplay} from './objDisplay.js';
 
 /**
  * ### .getMessage(object, message, negateMessage)
@@ -24,14 +20,14 @@ var flag = require('./flag')
  * - `#{act}` actual value
  * - `#{exp}` expected value
  *
- * @param {Object} object (constructed Assertion)
- * @param {Arguments} chai.Assertion.prototype.assert arguments
+ * @param {object} obj object (constructed Assertion)
+ * @param {unknown} args chai.Assertion.prototype.assert arguments
+ * @returns {unknown}
  * @namespace Utils
  * @name getMessage
- * @api public
+ * @public
  */
-
-module.exports = function getMessage(obj, args) {
+export function getMessage(obj, args) {
   var negate = flag(obj, 'negate')
     , val = flag(obj, 'object')
     , expected = args[3]
@@ -47,4 +43,4 @@ module.exports = function getMessage(obj, args) {
     .replace(/#\{exp\}/g, function () { return objDisplay(expected); });
 
   return flagMsg ? flagMsg + ': ' + msg : msg;
-};
+}

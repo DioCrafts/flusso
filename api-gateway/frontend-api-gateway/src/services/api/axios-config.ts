@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Define la URL base directamente en el código
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://api-gateway-backend:3000',
+  baseURL: 'http://localhost:3000', // Dirección del backend
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'

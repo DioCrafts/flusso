@@ -1,13 +1,15 @@
-var config = require('../config');
-var flag = require('./flag');
-var getProperties = require('./getProperties');
-var isProxyEnabled = require('./isProxyEnabled');
+import {config} from '../config.js';
+import {flag} from './flag.js';
+import {getProperties} from './getProperties.js';
+import {isProxyEnabled} from './isProxyEnabled.js';
 
 /*!
  * Chai - proxify utility
  * Copyright(c) 2012-2014 Jake Luer <jake@alogicalparadox.com>
  * MIT Licensed
  */
+
+const builtins = ['__flags', '__methods', '_obj', 'assert'];
 
 /**
  * ### .proxify(object)
@@ -22,15 +24,13 @@ var isProxyEnabled = require('./isProxyEnabled');
  * If proxies are unsupported or disabled via the user's Chai config, then
  * return object without modification.
  *
- * @param {Object} obj
- * @param {String} nonChainableMethodName
+ * @param {object} obj
+ * @param {string} nonChainableMethodName
+ * @returns {unknown}
  * @namespace Utils
  * @name proxify
  */
-
-var builtins = ['__flags', '__methods', '_obj', 'assert'];
-
-module.exports = function proxify(obj, nonChainableMethodName) {
+export function proxify(obj ,nonChainableMethodName) {
   if (!isProxyEnabled()) return obj;
 
   return new Proxy(obj, {
@@ -98,18 +98,18 @@ module.exports = function proxify(obj, nonChainableMethodName) {
       return Reflect.get(target, property);
     }
   });
-};
+}
 
 /**
  * # stringDistanceCapped(strA, strB, cap)
  * Return the Levenshtein distance between two strings, but no more than cap.
+ *
  * @param {string} strA
  * @param {string} strB
- * @param {number} number
- * @return {number} min(string distance between strA and strB, cap)
- * @api private
+ * @param {number} cap
+ * @returns {number} min(string distance between strA and strB, cap)
+ * @private
  */
-
 function stringDistanceCapped(strA, strB, cap) {
   if (Math.abs(strA.length - strB.length) >= cap) {
     return cap;
